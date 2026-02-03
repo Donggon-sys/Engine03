@@ -32,7 +32,7 @@ Window::Window() {
         exit(EXIT_FAILURE);
     }
     
-    pLayer = CA::MetalLayer::layer()->layer();
+    pLayer = CA::MetalLayer::layer();
     pDevice = MTL::CreateSystemDefaultDevice();
     pLayer->setDevice(pDevice);
     pLayer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
