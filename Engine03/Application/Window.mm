@@ -16,8 +16,12 @@
 #include <QuartzCore/CAMetalLayer.h>
 
 void Window::run() {
+    int width, height;
     while (!glfwWindowShouldClose(pWindow)) {
-        pRender->drawInCAMetalLayer(pLayer);
+        glfwGetWindowSize(pWindow, &width, &height);
+        
+        pRender->changeSize(&width, &height);
+        pRender->draw(pLayer);
         glfwPollEvents();
     }
 }
@@ -38,7 +42,7 @@ Window::Window() {
     pLayer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
     
     setCAMetalLayer();
-    pRender = new RenderAdapter();
+    pRender = new Render(pLayer);
 }
 
 Window::~Window() {

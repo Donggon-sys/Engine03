@@ -11,13 +11,14 @@
 #include <QuartzCore/CAMetalLayer.hpp>
 
 #include "RenderAdapter.hpp"
+#include "Render.hpp"
 
 class Window {
 private:
     GLFWwindow *pWindow;
     CA::MetalLayer *pLayer;
     MTL::Device *pDevice;
-    RenderAdapter *pRender;
+    Render *pRender;
     
     void setCAMetalLayer();
     

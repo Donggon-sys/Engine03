@@ -17,7 +17,7 @@ private:
     Render *pRender;
     
 public:
-    RenderAdapter();
+    RenderAdapter(CA::MetalLayer *layer);
     ~RenderAdapter();
     void drawInCAMetalLayer(CA::MetalLayer *layer);
 };

@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0BA18D6C2F32FA09003D87EA /* libglfw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BEFE8752F30554D002C7CC1 /* libglfw3.a */; };
 		0BEFE86C2F305512002C7CC1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BEFE86B2F305512002C7CC1 /* Cocoa.framework */; };
 		0BEFE86E2F305520002C7CC1 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BEFE86D2F305520002C7CC1 /* CoreGraphics.framework */; };
 		0BEFE8702F305526002C7CC1 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BEFE86F2F305526002C7CC1 /* Accelerate.framework */; };
 		0BEFE8722F305530002C7CC1 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BEFE8712F305530002C7CC1 /* Metal.framework */; };
 		0BEFE8742F305539002C7CC1 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BEFE8732F305539002C7CC1 /* IOKit.framework */; };
-		0BEFE8762F305558002C7CC1 /* libglfw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BEFE8752F30554D002C7CC1 /* libglfw3.a */; };
 		0BEFE8782F305848002C7CC1 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BEFE8772F305848002C7CC1 /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
@@ -41,12 +41,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				0BEFE8702F305526002C7CC1 /* Accelerate.framework in Frameworks */,
+				0BA18D6C2F32FA09003D87EA /* libglfw3.a in Frameworks */,
 				0BEFE86E2F305520002C7CC1 /* CoreGraphics.framework in Frameworks */,
 				0BEFE8782F305848002C7CC1 /* QuartzCore.framework in Frameworks */,
 				0BEFE8722F305530002C7CC1 /* Metal.framework in Frameworks */,
 				0BEFE8742F305539002C7CC1 /* IOKit.framework in Frameworks */,
 				0BEFE86C2F305512002C7CC1 /* Cocoa.framework in Frameworks */,
-				0BEFE8762F305558002C7CC1 /* libglfw3.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,8 +7,8 @@
 
 #include "RenderAdapter.hpp"
 
-RenderAdapter::RenderAdapter() {
-    pRender = new Render();
+RenderAdapter::RenderAdapter(CA::MetalLayer *layer) {
+    pRender = new Render(layer);
 }
 
 RenderAdapter::~RenderAdapter() {
@@ -17,4 +17,5 @@ RenderAdapter::~RenderAdapter() {
 
 void RenderAdapter::drawInCAMetalLayer(CA::MetalLayer *layer) {
 //    pRender
+    pRender->draw(layer);
 }
