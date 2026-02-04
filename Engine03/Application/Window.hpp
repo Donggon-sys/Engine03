@@ -18,7 +18,7 @@ private:
     GLFWwindow *pWindow;
     CA::MetalLayer *pLayer;
     MTL::Device *pDevice;
-    Render *pRender;
+    RenderAdapter *pRender;
     
     void setCAMetalLayer();
     

@@ -19,3 +19,7 @@ void RenderAdapter::drawInCAMetalLayer(CA::MetalLayer *layer) {
 //    pRender
     pRender->draw(layer);
 }
+
+void RenderAdapter::changeSize(int *width, int *height) {
+    pRender->changeSize(width, height);
+}
