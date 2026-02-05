@@ -15,15 +15,36 @@
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
 
+const double maxFrameRate = 1.0 / 60.0;
+
 void Window::run() {
     int width, height;
+    lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(pWindow)) {
         glfwGetWindowSize(pWindow, &width, &height);
         
-        pRender->changeSize(&width, &height);
-        pRender->drawInCAMetalLayer(pLayer);
+        if (shouldDraw()) {
+            pRender->changeSize(&width, &height);
+            pRender->drawInCAMetalLayer(pLayer);
+        }
         glfwPollEvents();
     }
+}
+
+bool Window::shouldDraw() {
+    double currentTime = glfwGetTime();
+    double delta = currentTime - lastTime;
+    
+    if (delta >= maxFrameRate) {
+        //TODO: 更新lastTime
+        lastTime = lastTime + maxFrameRate;
+        
+        if (currentTime - lastTime > maxFrameRate) {
+            lastTime = currentTime;
+        }
+        return true;
+    }
+    return false;
 }
 
 Window::Window() {

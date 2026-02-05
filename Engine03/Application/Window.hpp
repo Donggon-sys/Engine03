@@ -19,8 +19,10 @@ private:
     CA::MetalLayer *pLayer;
     MTL::Device *pDevice;
     RenderAdapter *pRender;
+    double lastTime;
     
     void setCAMetalLayer();
+    bool shouldDraw();
     
 public:
     void run();
