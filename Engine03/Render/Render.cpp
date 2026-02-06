@@ -12,16 +12,15 @@ Render::Render(CA::MetalLayer *layer) {
     viewPortSize = simd::make_uint2(800, 600);
     pDevice = layer->device();
     pLibrary = pDevice->newDefaultLibrary();
-    createTriangleRenderPipeLine(layer);
-    
     pCommandQueue = pDevice->newCommandQueue();
     
     //TODO: 创建对应的buffer,以后是在scene中处理buffer的
-    createTriangleBuffer();
+    pScene = new Scene();
+    pScene->createScene(pDevice, pLibrary);
 }
 
 Render::~Render() {
-    
+    delete pScene;
 }
 
 void Render::draw(CA::MetalLayer *layer) {
@@ -46,10 +45,7 @@ void Render::draw(CA::MetalLayer *layer) {
     MTL::RenderCommandEncoder *_pEncoder = pCommandBuffer->renderCommandEncoder(_pTargetRenderPassDescriptor);
     
     //TODO: 使用encoder去编码命令,以后使用scene中的函数，提过传入encoder实现
-    _pEncoder->setRenderPipelineState(pTrianglePSO);
-    _pEncoder->setVertexBuffer(pTriangleBuffer, NS::UInteger(0), NS::UInteger(0));
-    _pEncoder->drawPrimitives(MTL::PrimitiveTypeTriangle, NS::UInteger(0), NS::UInteger(3));
-    //
+    pScene->renderScene(_pEncoder);
     
     _pEncoder->endEncoding();
     pCommandBuffer->presentDrawable(_pDrawable);
@@ -58,34 +54,6 @@ void Render::draw(CA::MetalLayer *layer) {
     
     _pTargetRenderPassDescriptor->release();
     pool->release();
-}
-
-void Render::createTriangleRenderPipeLine(CA::MetalLayer *layer) {
-    MTL::Function *_pVertexShader = pLibrary->newFunction(NS::String::string("vertexShader", NS::UTF8StringEncoding));
-    MTL::Function *_pFragmentShader = pLibrary->newFunction(NS::String::string("fragmentShader", NS::UTF8StringEncoding));
-    
-    MTL::RenderPipelineDescriptor *_pRenderPipelineDescriptor = MTL::RenderPipelineDescriptor::alloc()->init();
-    _pRenderPipelineDescriptor->setLabel(NS::String::string("triangle Rendering Pipeline", NS::UTF8StringEncoding));
-    _pRenderPipelineDescriptor->setVertexFunction(_pVertexShader);
-    _pRenderPipelineDescriptor->setFragmentFunction(_pFragmentShader);
-    _pRenderPipelineDescriptor->colorAttachments()->object(NS::UInteger(0))->setPixelFormat(layer->pixelFormat());
-    
-    NS::Error *error;
-    pTrianglePSO = pDevice->newRenderPipelineState(_pRenderPipelineDescriptor, &error);
-    
-    _pRenderPipelineDescriptor->release();
-    _pVertexShader->release();
-    _pFragmentShader->release();
-}
-
-void Render::createTriangleBuffer() {
-    simd::float3 triangleVertices[] = {
-        {-0.5f, -0.5f, 0.0f},
-        { 0.5f, -0.5f, 0.0f},
-        { 0.0f,  0.5f, 0.0f}
-    };
-    
-    pTriangleBuffer = pDevice->newBuffer(&triangleVertices, sizeof(triangleVertices), MTL::StorageModeShared);
 }
 
 void Render::changeSize(int *width, int *height) {
