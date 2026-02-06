@@ -14,13 +14,13 @@
 
 class Render {
 private:
+    Scene *pScene;
     MTL::Device *pDevice;
     MTL::Library *pLibrary;
     MTL::CommandQueue *pCommandQueue;
     MTL::CommandBuffer *pCommandBuffer;
     simd::uint2 viewPortSize;
-    
-    Scene *pScene;
+    MTL::RenderPassDescriptor *createRenderPassDescriptor(CA::MetalDrawable *drawable);
     
 public:
     Render(CA::MetalLayer *layer);

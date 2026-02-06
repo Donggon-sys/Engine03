@@ -22,6 +22,16 @@ Render::~Render() {
     delete pScene;
 }
 
+MTL::RenderPassDescriptor *Render::createRenderPassDescriptor(CA::MetalDrawable *drawable) {
+    MTL::RenderPassDescriptor *targetRenderPassDescriptor = MTL::RenderPassDescriptor::alloc()->init();
+    targetRenderPassDescriptor->colorAttachments()->object(NS::UInteger(0))->setTexture(drawable->texture());
+    targetRenderPassDescriptor->colorAttachments()->object(NS::UInteger(0))->setLoadAction(MTL::LoadActionClear);
+    targetRenderPassDescriptor->colorAttachments()->object(NS::UInteger(0))->setClearColor(MTL::ClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+    targetRenderPassDescriptor->colorAttachments()->object(NS::UInteger(0))->setStoreAction(MTL::StoreActionStore);
+    
+    return targetRenderPassDescriptor;
+}
+
 void Render::draw(CA::MetalLayer *layer) {
     NS::AutoreleasePool *pool = NS::AutoreleasePool::alloc()->init();
     
@@ -30,15 +40,9 @@ void Render::draw(CA::MetalLayer *layer) {
         pool->release();
         return;
     }
-    layer->setDrawableSize(CGSizeMake(viewPortSize.x * 2, viewPortSize.y * 2));
-    MTL::RenderPassDescriptor *_pTargetRenderPassDescriptor;
-    _pTargetRenderPassDescriptor = MTL::RenderPassDescriptor::alloc()->init();
     
-    MTL::RenderPassColorAttachmentDescriptor *cd = _pTargetRenderPassDescriptor->colorAttachments()->object(NS::UInteger(0));
-    cd->setTexture(_pDrawable->texture());
-    cd->setLoadAction(MTL::LoadActionClear);
-    cd->setClearColor(MTL::ClearColor(0.0f, 0.0f, 0.0f, 1.0f));
-    cd->setStoreAction(MTL::StoreActionStore);
+    layer->setDrawableSize(CGSizeMake(viewPortSize.x * 2, viewPortSize.y * 2));
+    MTL::RenderPassDescriptor *_pTargetRenderPassDescriptor = createRenderPassDescriptor(_pDrawable);
     
     pCommandBuffer = pCommandQueue->commandBuffer();
     MTL::RenderCommandEncoder *_pEncoder = pCommandBuffer->renderCommandEncoder(_pTargetRenderPassDescriptor);
