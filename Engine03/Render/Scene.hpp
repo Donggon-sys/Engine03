@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "Model.hpp"
 #include <vector>
+#include "Model.hpp"
 
 class Scene {
 private:

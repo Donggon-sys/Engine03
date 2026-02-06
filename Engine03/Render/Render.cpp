@@ -6,7 +6,6 @@
 //
 
 #include "Render.hpp"
-#include <simd/simd.h>
 
 Render::Render(CA::MetalLayer *layer) {
     viewPortSize = simd::make_uint2(800, 600);
