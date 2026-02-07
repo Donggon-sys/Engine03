@@ -40,11 +40,11 @@ void Render::draw(CA::MetalLayer *layer) {
         pool->release();
         return;
     }
-    
     layer->setDrawableSize(CGSizeMake(viewPortSize.x * 2, viewPortSize.y * 2));
-    MTL::RenderPassDescriptor *_pTargetRenderPassDescriptor = createRenderPassDescriptor(_pDrawable);
     
     pCommandBuffer = pCommandQueue->commandBuffer();
+    
+    MTL::RenderPassDescriptor *_pTargetRenderPassDescriptor = createRenderPassDescriptor(_pDrawable);
     MTL::RenderCommandEncoder *_pEncoder = pCommandBuffer->renderCommandEncoder(_pTargetRenderPassDescriptor);
     
     //TODO: 使用encoder去编码命令,以后使用scene中的函数，提过传入encoder实现
@@ -56,6 +56,7 @@ void Render::draw(CA::MetalLayer *layer) {
     pCommandBuffer->waitUntilCompleted();
     
     _pTargetRenderPassDescriptor->release();
+    
     pool->release();
 }
 
