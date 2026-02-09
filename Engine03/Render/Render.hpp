@@ -33,4 +33,5 @@ public:
     void goBack();
     void moveLeft();
     void moveRight();
+    void mouse(float deltaX, float deltaY);
 };

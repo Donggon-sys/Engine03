@@ -19,7 +19,7 @@ const double maxFrameRate = 1.0 / 59.0;
 
 void Window::processInput() {
     if (glfwGetKey(pWindow, GLFW_KEY_W)) {
-        pRender->goFroward();
+        pRender->goForward();
     }
     if (glfwGetKey(pWindow, GLFW_KEY_S)) {
         pRender->goBack();
@@ -30,6 +30,24 @@ void Window::processInput() {
     if (glfwGetKey(pWindow, GLFW_KEY_D)) {
         pRender->moveRight();
     }
+    
+    double mouseX, mouseY;
+    glfwGetCursorPos(pWindow, &mouseX, &mouseY);
+    
+    if (!isInit) {
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+        isInit = true;
+        return;
+    }
+    
+    float delatX = (float)mouseX - lastMouseX;
+    float delatY = (float)mouseY - lastMouseY;
+    
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+    
+    pRender->mouse(delatX, delatY);
 }
 
 void Window::run() {
@@ -80,6 +98,8 @@ Window::Window() {
     
     setCAMetalLayer();
     pRender = new RenderAdapter(pLayer);
+    
+    isInit = false;
 }
 
 Window::~Window() {

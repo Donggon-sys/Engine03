@@ -14,15 +14,19 @@ private:
     float aspect;
     float zNear;
     float zFar;
+    float sensitivity;
+    
+    float yaw = 0.0f;
+    float pitch = 0.0f;
     
     simd::float3 position;
-    simd::float3 worldUP;
-    simd::float3 up;
-    simd::float3 center;
-    simd::float3 front;
+    simd::quatf orientation;
     
     simd::float4x4 lookAt(simd::float3 eye, simd::float3 center, simd::float3 up);
     simd::float4x4 projection(float fovy, float aspect, float zNear, float zFar);
+    simd::float3 getFront();
+    simd::float3 getUP();
+    simd::float3 getRight();
     
 public:
     Camera();
@@ -34,4 +38,5 @@ public:
     void goBack();
     void moveLeft();
     void moveRight();
+    void mouse(float deltaX, float deltaY);
 };

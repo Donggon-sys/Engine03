@@ -24,7 +24,11 @@ void RenderAdapter::changeSize(int *width, int *height) {
     pRender->changeSize(width, height);
 }
 
-void RenderAdapter::goFroward() {
+void RenderAdapter::mouse(float delatX, float delatY) {
+    pRender->mouse(delatX, delatY);
+}
+
+void RenderAdapter::goForward() {
     pRender->goForward();
 }
 

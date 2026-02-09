@@ -20,6 +20,9 @@ private:
     MTL::Device *pDevice;
     RenderAdapter *pRender;
     double lastTime;
+    double lastMouseX;
+    double lastMouseY;
+    bool isInit;
     
     void setCAMetalLayer();
     bool shouldDraw();

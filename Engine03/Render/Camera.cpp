@@ -6,38 +6,67 @@
 //
 
 #include "Camera.hpp"
+//#include <algorithm>
 
 Camera::Camera() {
     fovy = 65.0f * (M_PI / 180.0f);
     aspect = 1.60037518;
     zNear = 0.1;
     zFar = 100;
+    sensitivity = 0.001f;
     
     position = simd::make_float3(0.0f, 0.0f, 3.0f);
-    center = simd::make_float3(0.0f, 0.0f, 0.0f);
-    up = simd::make_float3(0.0f, 1.0f, 0.0f);
-    worldUP = simd::make_float3(0.0f, 1.0f, 0.0f);
-    front = simd::make_float3(0.0f, 0.0f, -1.0f);
+    orientation = simd::quatf(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 Camera::~Camera() {
     
 }
 
+void Camera::mouse(float deltaX, float deltaY) {
+    yaw -= deltaX * sensitivity;
+    pitch -= deltaY * sensitivity;
+    
+    // 限制俯仰角，防止万向节锁和翻转
+    const float limit = M_PI_2 - 0.01f;
+    pitch = (pitch > limit) ? limit : (pitch < -limit) ? -limit : pitch;
+    
+    float cy = cosf(yaw * 0.5f), sy = sinf(yaw * 0.5f);
+    float cp = cosf(pitch * 0.5f), sp = sinf(pitch * 0.5f);
+    
+    orientation = simd::normalize(simd::quatf(
+        sp * cy,
+        cp * sy,
+        -sp * sy,
+        cp * cy
+    ));
+}
+
+simd::float3 Camera::getFront() {
+    return orientation * simd::make_float3(0.0f, 0.0f, -1.0f);
+}
+simd::float3 Camera::getUP() {
+    return orientation * simd::make_float3(0.0f, 1.0f, 0.0f);
+}
+
+simd::float3 Camera::getRight() {
+    return orientation * simd::make_float3(1.0f, 0.0f, 0.0f);
+}
+
 void Camera::moveLeft() {
-    position = position - simd::normalize(simd::cross(front, up)) * 0.06f;
+    position = position - simd::normalize(simd::cross(getFront(), getUP())) * 0.06f;
 }
 
 void Camera::moveRight() {
-    position = position + simd::normalize(simd::cross(front, up)) * 0.06f;
+    position = position + simd::normalize(simd::cross(getFront(), getUP())) * 0.06f;
 }
 
 void Camera::goForward() {
-    position = position + 0.06f * front;
+    position = position + 0.06f * getFront();
 }
 
 void Camera::goBack() {
-    position = position - 0.06f * front;
+    position = position - 0.06f * getFront();
 }
 
 void Camera::setAspect(float A) {
@@ -45,7 +74,7 @@ void Camera::setAspect(float A) {
 }
 
 simd::float4x4 Camera::getViewProjectionMatrix() {
-    return projection(fovy, aspect, zNear, zFar) * lookAt(position, position + front, up);
+    return projection(fovy, aspect, zNear, zFar) * lookAt(position, position + getFront(), getUP());
 }
 
 simd::float4x4 Camera::lookAt(simd::float3 eye, simd::float3 center, simd::float3 up) {

@@ -72,6 +72,10 @@ void Render::changeSize(int *width, int *height) {
     viewPortSize.y = Uheight;
 }
 
+void Render::mouse(float delatX, float delatY) {
+    pCamera->mouse(delatX, delatY);
+}
+
 void Render::goForward() {
     pCamera->goForward();
 }
