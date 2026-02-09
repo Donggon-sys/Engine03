@@ -21,4 +21,8 @@ public:
     ~RenderAdapter();
     void drawInCAMetalLayer(CA::MetalLayer *layer);
     void changeSize(int *width, int *height);
+    void goFroward();
+    void goBack();
+    void moveLeft();
+    void moveRight();
 };

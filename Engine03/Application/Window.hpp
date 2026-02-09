@@ -23,6 +23,7 @@ private:
     
     void setCAMetalLayer();
     bool shouldDraw();
+    void processInput();
     
 public:
     void run();

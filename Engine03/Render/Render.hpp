@@ -29,4 +29,8 @@ public:
     ~Render();
     void draw(CA::MetalLayer *layer);
     void changeSize(int *width, int *height);
+    void goForward();
+    void goBack();
+    void moveLeft();
+    void moveRight();
 };

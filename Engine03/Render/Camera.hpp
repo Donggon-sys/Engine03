@@ -29,4 +29,9 @@ public:
     ~Camera();
     void setAspect(float A);
     simd::float4x4 getViewProjectionMatrix();
+    
+    void goForward();
+    void goBack();
+    void moveLeft();
+    void moveRight();
 };

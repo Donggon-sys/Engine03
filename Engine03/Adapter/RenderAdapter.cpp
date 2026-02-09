@@ -23,3 +23,19 @@ void RenderAdapter::drawInCAMetalLayer(CA::MetalLayer *layer) {
 void RenderAdapter::changeSize(int *width, int *height) {
     pRender->changeSize(width, height);
 }
+
+void RenderAdapter::goFroward() {
+    pRender->goForward();
+}
+
+void RenderAdapter::goBack() {
+    pRender->goBack();
+}
+
+void RenderAdapter::moveLeft() {
+    pRender->moveLeft();
+}
+
+void RenderAdapter::moveRight() {
+    pRender->moveRight();
+}

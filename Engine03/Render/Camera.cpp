@@ -24,6 +24,22 @@ Camera::~Camera() {
     
 }
 
+void Camera::moveLeft() {
+    position = position - simd::normalize(simd::cross(front, up)) * 0.06f;
+}
+
+void Camera::moveRight() {
+    position = position + simd::normalize(simd::cross(front, up)) * 0.06f;
+}
+
+void Camera::goForward() {
+    position = position + 0.06f * front;
+}
+
+void Camera::goBack() {
+    position = position - 0.06f * front;
+}
+
 void Camera::setAspect(float A) {
     aspect = A;
 }

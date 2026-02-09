@@ -71,3 +71,19 @@ void Render::changeSize(int *width, int *height) {
     viewPortSize.x = Uwidth;
     viewPortSize.y = Uheight;
 }
+
+void Render::goForward() {
+    pCamera->goForward();
+}
+
+void Render::goBack() {
+    pCamera->goBack();
+}
+
+void Render::moveLeft() {
+    pCamera->moveLeft();
+}
+
+void Render::moveRight() {
+    pCamera->moveRight();
+}

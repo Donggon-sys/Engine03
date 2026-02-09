@@ -15,7 +15,22 @@
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
 
-const double maxFrameRate = 1.0 / 60.0;
+const double maxFrameRate = 1.0 / 59.0;
+
+void Window::processInput() {
+    if (glfwGetKey(pWindow, GLFW_KEY_W)) {
+        pRender->goFroward();
+    }
+    if (glfwGetKey(pWindow, GLFW_KEY_S)) {
+        pRender->goBack();
+    }
+    if (glfwGetKey(pWindow, GLFW_KEY_A)) {
+        pRender->moveLeft();
+    }
+    if (glfwGetKey(pWindow, GLFW_KEY_D)) {
+        pRender->moveRight();
+    }
+}
 
 void Window::run() {
     int width, height;
@@ -24,6 +39,7 @@ void Window::run() {
         glfwGetWindowSize(pWindow, &width, &height);
         
         if (shouldDraw()) {
+            processInput();
             pRender->changeSize(&width, &height);
             pRender->drawInCAMetalLayer(pLayer);
         }
