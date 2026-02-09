@@ -22,8 +22,8 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     modelList.push_back(std::move(m1));
 }
 
-void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
+void Scene::renderScene(MTL::RenderCommandEncoder *encoder, simd::float4x4 matrix) {
     for (Model& model : modelList) {
-        model.renderModel(encoder);
+        model.renderModel(encoder, matrix);
     }
 }

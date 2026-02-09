@@ -16,10 +16,12 @@ Render::Render(CA::MetalLayer *layer) {
     //TODO: 创建对应的buffer,以后是在scene中处理buffer的
     pScene = new Scene();
     pScene->createScene(pDevice, pLibrary);
+    pCamera = new Camera();
 }
 
 Render::~Render() {
     delete pScene;
+    delete pCamera;
 }
 
 MTL::RenderPassDescriptor *Render::createRenderPassDescriptor(CA::MetalDrawable *drawable) {
@@ -48,7 +50,9 @@ void Render::draw(CA::MetalLayer *layer) {
     MTL::RenderCommandEncoder *_pEncoder = pCommandBuffer->renderCommandEncoder(_pTargetRenderPassDescriptor);
     
     //TODO: 使用encoder去编码命令,以后使用scene中的函数，提过传入encoder实现
-    pScene->renderScene(_pEncoder);
+    pCamera->setAspect(viewPortSize.x / viewPortSize.y);
+    simd::float4x4 viewPorjection = pCamera->getViewProjectionMatrix();
+    pScene->renderScene(_pEncoder, viewPorjection);
     
     _pEncoder->endEncoding();
     pCommandBuffer->presentDrawable(_pDrawable);

@@ -11,10 +11,12 @@
 #include <simd/simd.h>
 
 #include "Scene.hpp"
+#include "Camera.hpp"
 
 class Render {
 private:
     Scene *pScene;
+    Camera *pCamera;
     MTL::Device *pDevice;
     MTL::Library *pLibrary;
     MTL::CommandQueue *pCommandQueue;

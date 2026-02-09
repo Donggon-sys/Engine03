@@ -19,5 +19,5 @@ public:
     ~Scene();
     
     void createScene(MTL::Device *device, MTL::Library *library);
-    void renderScene(MTL::RenderCommandEncoder *encoder);
+    void renderScene(MTL::RenderCommandEncoder *encoder, simd::float4x4 matrix);
 };

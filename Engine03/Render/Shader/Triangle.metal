@@ -10,9 +10,10 @@ using namespace metal;
 
 vertex float4
 vertexShader(uint vertexID [[vertex_id]],
-             constant simd::float3* vertexPositions)
+             constant simd::float3* vertexPositions,
+             constant simd::float4x4 *viewProjectionMatrix)
 {
-    float4 vertexOutPositions = float4(vertexPositions[vertexID][0],
+    float4 vertexOutPositions = *viewProjectionMatrix * float4(vertexPositions[vertexID][0],
                                        vertexPositions[vertexID][1],
                                        vertexPositions[vertexID][2],
                                        1.0f);
