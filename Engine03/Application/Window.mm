@@ -47,7 +47,7 @@ void Window::processInput() {
     lastMouseX = mouseX;
     lastMouseY = mouseY;
     
-    pRender->mouse(delatX, delatY);
+    pRender->mouse(-delatX, delatY);
 }
 
 void Window::run() {
