@@ -15,7 +15,6 @@ private:
     MTL::Buffer *pModelBuffer;
     MTL::RenderPipelineState *pModelPSO;
     
-    void createPipelineState(MTL::Device *device, MTL::Library *library);
     void createBuffer(MTL::Device *device);
     
 public:
@@ -28,6 +27,6 @@ public:
     Model(Model &&other);
     Model& operator=(Model &&other);
     
-    void build(MTL::Device *device, MTL::Library *library);
+    void build(MTL::Device *device, MTL::RenderPipelineState *PSO);
     void renderModel(MTL::RenderCommandEncoder *encoder);
 };

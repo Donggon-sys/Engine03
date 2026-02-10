@@ -15,6 +15,9 @@ class Scene {
 private:
     std::vector<Model> modelList;
     simd::float4x4 viewProjectionMatrix;
+    MTL::RenderPipelineState *PSO;
+    
+    void createPipelineState(MTL::Device *device, MTL::Library *library);
     
 public:
     Scene();

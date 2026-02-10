@@ -43,32 +43,14 @@ Model& Model::operator=(Model &&other) {
     return *this;
 }
 
-void Model::build(MTL::Device *device, MTL::Library *library) {
+void Model::build(MTL::Device *device, MTL::RenderPipelineState *PSO) {
     createBuffer(device);
-    createPipelineState(device, library);
+    pModelPSO = PSO;
 }
 
 void Model::renderModel(MTL::RenderCommandEncoder *encoder) {
-    encoder->setRenderPipelineState(pModelPSO);
     encoder->setVertexBuffer(pModelBuffer, NS::UInteger(0), NS::UInteger(0));
     
-}
-
-void Model::createPipelineState(MTL::Device *device, MTL::Library *library) {
-    MTL::Function *vertexShader = library->newFunction(NS::String::string("vertexShader", NS::UTF8StringEncoding));
-    MTL::Function *fragmentShader = library->newFunction(NS::String::string("fragmentShader", NS::UTF8StringEncoding));
-    
-    MTL::RenderPipelineDescriptor *descriptor = MTL::RenderPipelineDescriptor::alloc()->init();
-    descriptor->setLabel(NS::String::string("model Rendering Pipeline", NS::UTF8StringEncoding));
-    descriptor->setVertexFunction(vertexShader);
-    descriptor->setFragmentFunction(fragmentShader);
-    descriptor->colorAttachments()->object(NS::UInteger(0))->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
-
-    NS::Error *error;
-    pModelPSO = device->newRenderPipelineState(descriptor, &error);
-    descriptor->release();
-    vertexShader->release();
-    fragmentShader->release();
 }
 
 void Model::createBuffer(MTL::Device *device) {
