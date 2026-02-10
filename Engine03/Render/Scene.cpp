@@ -25,11 +25,10 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
     encoder->setRenderPipelineState(PSO);
+    encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(1));
     for (Model& model : modelList) {
         model.renderModel(encoder);
     }
-    encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(1));
-    encoder->drawPrimitives(MTL::PrimitiveTypeTriangle, NS::UInteger(0), NS::UInteger(3));
 }
 
 void Scene::setViewProjectionMatrix(simd::float4x4 matrix) {

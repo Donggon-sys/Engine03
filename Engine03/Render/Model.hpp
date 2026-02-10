@@ -13,6 +13,7 @@
 class Model {
 private:
     MTL::Buffer *pModelBuffer;
+    MTL::Buffer *pIndexBuffer;
 
     void createBuffer(MTL::Device *device);
     
