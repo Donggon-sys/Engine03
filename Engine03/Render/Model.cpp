@@ -13,39 +13,28 @@ Model::Model() {
 }
 
 Model::~Model() {
-    pModelPSO->release();
     pModelBuffer->release();
 }
 
 Model::Model(Model&&other) {
-    pModelPSO = other.pModelPSO;
     pModelBuffer = other.pModelBuffer;
-    
     other.pModelBuffer = nullptr;
-    other.pModelPSO = nullptr;
 }
 
 Model& Model::operator=(Model &&other) {
     if (this != &other) {
-        if (pModelPSO) {
-            pModelPSO->release();
-        }
         if (pModelBuffer) {
             pModelBuffer->release();
         }
         
-        pModelPSO = other.pModelPSO;
         pModelBuffer = other.pModelBuffer;
-        
         other.pModelBuffer = nullptr;
-        other.pModelPSO = nullptr;
     }
     return *this;
 }
 
-void Model::build(MTL::Device *device, MTL::RenderPipelineState *PSO) {
+void Model::build(MTL::Device *device) {
     createBuffer(device);
-    pModelPSO = PSO;
 }
 
 void Model::renderModel(MTL::RenderCommandEncoder *encoder) {

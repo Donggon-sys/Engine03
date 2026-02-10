@@ -18,7 +18,7 @@ Scene::~Scene() {
 void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
     Model m1 = Model();
-    m1.build(device, PSO);
+    m1.build(device);
     
     modelList.push_back(std::move(m1));
 }
