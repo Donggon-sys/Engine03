@@ -15,7 +15,7 @@
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
 
-const double maxFrameRate = 1.0 / 59.0;
+const double maxFrameRate = 1.0 / 60.0;
 
 void Window::processInput() {
     if (glfwGetKey(pWindow, GLFW_KEY_W)) {

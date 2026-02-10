@@ -29,5 +29,5 @@ public:
     Model& operator=(Model &&other);
     
     void build(MTL::Device *device, MTL::Library *library);
-    void renderModel(MTL::RenderCommandEncoder *encoder, simd::float4x4 matrix);
+    void renderModel(MTL::RenderCommandEncoder *encoder);
 };

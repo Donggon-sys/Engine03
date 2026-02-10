@@ -48,11 +48,10 @@ void Model::build(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
 }
 
-void Model::renderModel(MTL::RenderCommandEncoder *encoder, simd::float4x4 matrix) {
+void Model::renderModel(MTL::RenderCommandEncoder *encoder) {
     encoder->setRenderPipelineState(pModelPSO);
     encoder->setVertexBuffer(pModelBuffer, NS::UInteger(0), NS::UInteger(0));
-    encoder->setVertexBytes(&matrix, sizeof(matrix), NS::UInteger(1));
-    encoder->drawPrimitives(MTL::PrimitiveTypeTriangle, NS::UInteger(0), NS::UInteger(3));
+    
 }
 
 void Model::createPipelineState(MTL::Device *device, MTL::Library *library) {

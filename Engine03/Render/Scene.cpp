@@ -22,8 +22,14 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     modelList.push_back(std::move(m1));
 }
 
-void Scene::renderScene(MTL::RenderCommandEncoder *encoder, simd::float4x4 matrix) {
+void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
     for (Model& model : modelList) {
-        model.renderModel(encoder, matrix);
+        model.renderModel(encoder);
     }
+    encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(1));
+    encoder->drawPrimitives(MTL::PrimitiveTypeTriangle, NS::UInteger(0), NS::UInteger(3));
+}
+
+void Scene::setViewProjectionMatrix(simd::float4x4 matrix) {
+    viewProjectionMatrix = matrix;
 }

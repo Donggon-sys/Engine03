@@ -51,8 +51,8 @@ void Render::draw(CA::MetalLayer *layer) {
     
     //TODO: 使用encoder去编码命令,以后使用scene中的函数，提过传入encoder实现
     pCamera->setAspect(viewPortSize.x / viewPortSize.y);
-    simd::float4x4 viewPorjection = pCamera->getViewProjectionMatrix();
-    pScene->renderScene(_pEncoder, viewPorjection);
+    pScene->setViewProjectionMatrix(pCamera->getViewProjectionMatrix());
+    pScene->renderScene(_pEncoder);
     
     _pEncoder->endEncoding();
     pCommandBuffer->presentDrawable(_pDrawable);
