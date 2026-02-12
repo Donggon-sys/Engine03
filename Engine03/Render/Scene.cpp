@@ -17,15 +17,17 @@ Scene::~Scene() {
 
 void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
-    Model m1 = Model();
-    m1.build(device);
+    Model m1 = Model(device);
+//    m1.build(device);
+    
+    m1.openFile("ball.glb");
     
     modelList.push_back(std::move(m1));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
     encoder->setRenderPipelineState(PSO);
-    encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(1));
+    encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBuffer));
     for (Model& model : modelList) {
         model.renderModel(encoder);
     }
@@ -44,9 +46,19 @@ void Scene::createPipelineState(MTL::Device *device, MTL::Library *library) {
     descriptor->setVertexFunction(vertexShader);
     descriptor->setFragmentFunction(fragmentShader);
     descriptor->colorAttachments()->object(NS::UInteger(0))->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+    
+    MTL::VertexDescriptor *vertexDescriptor = MTL::VertexDescriptor::alloc()->init();
+    vertexDescriptor->attributes()->object(NS::UInteger(0))->setFormat(MTL::VertexFormatFloat3);
+    vertexDescriptor->attributes()->object(NS::UInteger(0))->setOffset(NS::UInteger(0));
+    vertexDescriptor->attributes()->object(NS::UInteger(0))->setBufferIndex(NS::UInteger(vertexPositionBuffer));
+    vertexDescriptor->layouts()->object(NS::UInteger(0))->setStride(NS::UInteger(sizeof(simd::float3)));
+    
+    descriptor->setVertexDescriptor(vertexDescriptor);
 
     NS::Error *error;
     PSO = device->newRenderPipelineState(descriptor, &error);
+    
+    vertexDescriptor->release();
     descriptor->release();
     vertexShader->release();
     fragmentShader->release();

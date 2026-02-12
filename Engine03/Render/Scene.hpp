@@ -10,6 +10,7 @@
 #include <vector>
 #include <simd/simd.h>
 #include "Model.hpp"
+#include "Shader/ShaderType.h"
 
 class Scene {
 private:

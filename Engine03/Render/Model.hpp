@@ -8,17 +8,27 @@
 #pragma once
 #include <Metal/Metal.hpp>
 #include <simd/simd.h>
+#include <vector>
+#include <map>
+#include <string>
 #include <Foundation/Foundation.hpp>
+
+#include "Shader/ShaderType.h"
 
 class Model {
 private:
-    MTL::Buffer *pModelBuffer;
-    MTL::Buffer *pIndexBuffer;
+    MTL::Buffer *pModelBuffer = nullptr;
+    MTL::Buffer *pIndexBuffer = nullptr;
+    MTL::Device *pDevice;
+    int indexCount;
 
-    void createBuffer(MTL::Device *device);
+    void createPositionBuffer(std::vector<simd::float3>& vertexPosition);
+    void createIndexBuffer(std::vector<unsigned int>& vertexIndices);
+    std::string getFileURL(std::string fileName);
+    void loadModel(std::string fileURL);
     
 public:
-    Model();
+    Model(MTL::Device *device);
     ~Model();
     //赋值
     Model(const Model &other) = delete;
@@ -27,6 +37,6 @@ public:
     Model(Model &&other);
     Model& operator=(Model &&other);
     
-    void build(MTL::Device *device);
     void renderModel(MTL::RenderCommandEncoder *encoder);
+    void openFile(std::string fileName);
 };
