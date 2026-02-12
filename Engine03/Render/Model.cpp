@@ -49,6 +49,7 @@ Model& Model::operator=(Model &&other) {
         other.pModelBuffer = nullptr;
         pIndexBuffer = other.pIndexBuffer;
         other.pIndexBuffer = nullptr;
+        indexCount = other.indexCount;
     }
     return *this;
 }

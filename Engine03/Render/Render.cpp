@@ -50,7 +50,7 @@ void Render::draw(CA::MetalLayer *layer) {
     MTL::RenderCommandEncoder *_pEncoder = pCommandBuffer->renderCommandEncoder(_pTargetRenderPassDescriptor);
     
     //TODO: 使用encoder去编码命令,以后使用scene中的函数，提过传入encoder实现
-    pCamera->setAspect(viewPortSize.x / viewPortSize.y);
+    pCamera->setAspect(static_cast<float>(viewPortSize.x) / static_cast<float>(viewPortSize.y));
     pScene->setViewProjectionMatrix(pCamera->getViewProjectionMatrix());
     pScene->renderScene(_pEncoder);
     

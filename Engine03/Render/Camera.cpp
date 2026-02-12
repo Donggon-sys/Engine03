@@ -8,7 +8,7 @@
 #include "Camera.hpp"
 
 Camera::Camera() {
-    fovy = 65.0f * (M_PI / 180.0f);
+    fovy = 45.0f * (M_PI / 180.0f);
     aspect = 1.60037518;
     zNear = 0.1;
     zFar = 100;
