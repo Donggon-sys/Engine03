@@ -33,6 +33,7 @@ Model::Model(Model &&other) {
     
     pIndexBuffer = other.pIndexBuffer;
     other.pIndexBuffer = nullptr;
+    indexCount = other.indexCount;
 }
 
 Model& Model::operator=(Model &&other) {
@@ -84,7 +85,7 @@ void Model::loadModel(std::string fileURL) {
     bool rel = loader.LoadBinaryFromFile(&model, &error, &warning, fileURL);
     
     if (!error.empty()) {
-        std::cout << warning << std::endl;
+        std::cout << error << std::endl;
     }
     if (!warning.empty()) {
         std::cout << warning << std::endl;
@@ -99,51 +100,56 @@ void Model::loadModel(std::string fileURL) {
     int nodeIndex = -1;
     for (tinygltf::Node &node : model.nodes) {
         ++nodeIndex;
-        tinygltf::Mesh &mesh = model.meshes[node.mesh];
-        
-        int meshIndex = nodeIndex;
-        for (tinygltf::Primitive &primitive : mesh.primitives) {
-            if (primitive.attributes.find("POSITION") != primitive.attributes.end()) {
-                const auto& positionAccessor = model.accessors[primitive.attributes.at("POSITION")];
-                const auto& positionBufferView = model.bufferViews[positionAccessor.bufferView];
-                const auto& positionBuffer = model.buffers[positionBufferView.buffer];
-                
-                std::vector<simd::float3> _vertices;
-                const auto* vertices = reinterpret_cast<const float *>(&positionBuffer.data[positionBufferView.byteOffset + positionAccessor.byteOffset]);
-                
-                for (int i= 0; i < positionAccessor.count; i++) {
-                    const auto&t = simd::make_float3(vertices[i * 3], vertices[i * 3 + 1],vertices[i * 3 + 2]);
-                    _vertices.push_back(t);
-                }
-                
-                vertexData.insert({meshIndex, _vertices});
-            }
-            
-            if (primitive.indices >= 0) {
-                const auto& indexAccessor = model.accessors[primitive.indices];
-                const auto& indexBufferView = model.bufferViews[indexAccessor.bufferView];
-                const auto& indexBuffer = model.buffers[indexBufferView.buffer];
-                
-                std::vector<unsigned int> _indices;
-                if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
-                    const unsigned int *indices = reinterpret_cast<const unsigned int *>(&indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]);
-                    for (int i = 0; i < indexAccessor.count; i++) {
-                        _indices.push_back(indices[i]);
+        for (tinygltf::Mesh &mesh : model.meshes) {
+            int meshIndex = nodeIndex;
+            for (tinygltf::Primitive &primitive : mesh.primitives) {
+                if (primitive.attributes.find("POSITION") != primitive.attributes.end()) {
+                    const auto& positionAccessor = model.accessors[primitive.attributes.at("POSITION")];
+                    const auto& positionBufferView = model.bufferViews[positionAccessor.bufferView];
+                    const auto& positionBuffer = model.buffers[positionBufferView.buffer];
+                    
+                    std::vector<simd::float3> _vertices;
+                    const auto* vertices = reinterpret_cast<const float *>(&positionBuffer.data[positionBufferView.byteOffset + positionAccessor.byteOffset]);
+                    
+                    for (int i= 0; i < positionAccessor.count; i++) {
+                        const auto&t = simd::make_float3(vertices[i * 3], vertices[i * 3 + 1],vertices[i * 3 + 2]);
+                        _vertices.push_back(t);
                     }
-                }
-                if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-                    const unsigned short *indices = reinterpret_cast<const unsigned short *>(&indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]);
-                    for (int i = 0; i < indexAccessor.count; i++) {
-                        _indices.push_back(indices[i]);
-                    }
+                    
+                    vertexData.insert({meshIndex, _vertices});
                 }
                 
-                indicesData.insert({meshIndex, _indices});
+                if (primitive.indices >= 0) {
+                    const auto& indexAccessor = model.accessors[primitive.indices];
+                    const auto& indexBufferView = model.bufferViews[indexAccessor.bufferView];
+                    const auto& indexBuffer = model.buffers[indexBufferView.buffer];
+                    
+                    std::vector<unsigned int> _indices;
+                    if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
+                        const unsigned int *indices = reinterpret_cast<const unsigned int *>(&indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]);
+                        for (int i = 0; i < indexAccessor.count; i++) {
+                            _indices.push_back(indices[i]);
+                        }
+                    }
+                    if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+                        const unsigned short *indices = reinterpret_cast<const unsigned short *>(&indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]);
+                        for (int i = 0; i < indexAccessor.count; i++) {
+                            _indices.push_back(indices[i]);
+                        }
+                    }
+                    
+                    indicesData.insert({meshIndex, _indices});
+                }
             }
         }
+        
+    }
+    if (indicesData.empty() || vertexData.empty()) {
+        std::cout << "模型数据为空" << std::endl;
+        return;
     }
     
     createIndexBuffer(indicesData.at(0));
     createPositionBuffer(vertexData.at(0));
-    indexCount = (int)indicesData.size();
+    indexCount = (int)indicesData.at(0).size();
 }
