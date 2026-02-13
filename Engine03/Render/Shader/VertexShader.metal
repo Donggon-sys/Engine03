@@ -12,10 +12,10 @@
 using namespace metal;
 
 [[vertex]] vertexOut vertexShader(vertexIn in [[stage_in]],
-                                  constant float4x4& viewProjectionMatrix [[buffer(viewProjectionBuffer)]]
-                                  ) {
+                                  constant float4x4& viewProjectionMatrix [[buffer(viewProjectionBufferIndex)]]) {
     vertexOut out;
     
     out.vertexPosition = viewProjectionMatrix * float4(in.vertexPosition, 1.0f);
+    out.texCoord = in.texCoord;
     return out;
 }

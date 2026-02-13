@@ -11,8 +11,11 @@
 
 using namespace metal;
 
-[[fragment]] float4 fragmentShader(vertexOut in [[stage_in]]) {
-    return float4(182.0f/255.0f, 240.0f/255.0f, 228.0f/255.0f, 1.0f);
+[[fragment]] float4 fragmentShader(vertexOut in [[stage_in]],
+                                   texture2d<float> texture[[texture(1)]]) {
+    constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
+    float4 out = texture.sample(textureSampler, in.texCoord);
+    return out;
 }
 
 

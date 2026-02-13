@@ -25,6 +25,12 @@ Model::~Model() {
     if (pModelBuffer != nullptr) {
         pModelBuffer->release();
     }
+    if (pTexCoordBuffer != nullptr) {
+        pTexCoordBuffer->release();
+    }
+    if (pTexture != nullptr) {
+        pTexture->release();
+    }
 }
 
 Model::Model(Model &&other) {
@@ -33,6 +39,13 @@ Model::Model(Model &&other) {
     
     pIndexBuffer = other.pIndexBuffer;
     other.pIndexBuffer = nullptr;
+    
+    pTexCoordBuffer = other.pTexCoordBuffer;
+    other.pTexCoordBuffer = nullptr;
+    
+    pTexture = other.pTexture;
+    other.pTexture = nullptr;
+    
     indexCount = other.indexCount;
 }
 
@@ -49,13 +62,19 @@ Model& Model::operator=(Model &&other) {
         other.pModelBuffer = nullptr;
         pIndexBuffer = other.pIndexBuffer;
         other.pIndexBuffer = nullptr;
+        pTexture = other.pTexture;
+        pTexCoordBuffer = other.pTexCoordBuffer;
+        other.pTexCoordBuffer = nullptr;
+        other.pTexture = nullptr;
         indexCount = other.indexCount;
     }
     return *this;
 }
 
 void Model::renderModel(MTL::RenderCommandEncoder *encoder) {
-    encoder->setVertexBuffer(pModelBuffer, NS::UInteger(0), NS::UInteger(vertexPositionBuffer));
+    encoder->setVertexBuffer(pModelBuffer, NS::UInteger(0), NS::UInteger(vertexPositionBufferIndex));
+    encoder->setVertexBuffer(pTexCoordBuffer, NS::UInteger(0), NS::UInteger(vertexTexCoordBufferIndex));
+    encoder->setFragmentTexture(pTexture, 1);
     encoder->drawIndexedPrimitives(MTL::PrimitiveTypeTriangle, NS::UInteger(indexCount), MTL::IndexTypeUInt32, pIndexBuffer, NS::UInteger(0), NS::UInteger(1));
 }
 
@@ -76,9 +95,16 @@ void Model::createIndexBuffer(std::vector<unsigned int>& vertexIndices) {
     pIndexBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::StorageModeShared);
 }
 
+void Model::createTexCoordBuffer(std::vector<simd::float2>& vertexTexCoord) {
+    pTexCoordBuffer = pDevice->newBuffer(vertexTexCoord.data(), vertexTexCoord.size() * sizeof(simd::float2), MTL::StorageModeShared);
+}
+
 void Model::loadModel(std::string fileURL) {
     std::map<int, std::vector<simd::float3>> vertexData;
+    std::map<int, std::vector<simd::float2>> texCoordData;
     std::map<int, std::vector<unsigned int>> indicesData;
+    std::map<int, std::vector<unsigned char>> imageData;
+    int imageWidth = 0, imageHeight = 0;
     
     tinygltf::Model model;
     tinygltf::TinyGLTF loader;
@@ -120,6 +146,22 @@ void Model::loadModel(std::string fileURL) {
                     vertexData.insert({meshIndex, _vertices});
                 }
                 
+                if (primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end()) {
+                    const auto& Accessor = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+                    const auto& BufferView = model.bufferViews[Accessor.bufferView];
+                    const auto& Buffer = model.buffers[BufferView.buffer];
+                    
+                    std::vector<simd::float2> _texCoords;
+                    const auto* texCoord = reinterpret_cast<const float *>(&Buffer.data[BufferView.byteOffset + Accessor.byteOffset]);
+                    
+                    for (int i= 0; i < Accessor.count; i++) {
+                        const auto&t = simd::make_float2(texCoord[i * 2], texCoord[i * 2 + 1]);
+                        _texCoords.push_back(t);
+                    }
+                    
+                    texCoordData.insert({meshIndex, _texCoords});
+                }
+                
                 if (primitive.indices >= 0) {
                     const auto& indexAccessor = model.accessors[primitive.indices];
                     const auto& indexBufferView = model.bufferViews[indexAccessor.bufferView];
@@ -141,6 +183,21 @@ void Model::loadModel(std::string fileURL) {
                     
                     indicesData.insert({meshIndex, _indices});
                 }
+                
+                if (model.textures.size() > 0) {
+                    tinygltf::Texture &Texture = model.textures[0];
+                    
+                    if (Texture.source > -1) {
+                        tinygltf::Image &img = model.images[Texture.source];
+                        std::vector<unsigned char> imgData = img.image;
+                        
+                        imageWidth = img.width;
+                        imageHeight = img.height;
+                        imageData.insert({meshIndex, imgData});
+                    }
+                }else {
+                    std::cout << "没有texture" << std::endl;
+                }
             }
         }
         
@@ -152,5 +209,20 @@ void Model::loadModel(std::string fileURL) {
     
     createIndexBuffer(indicesData.at(0));
     createPositionBuffer(vertexData.at(0));
+    createTexCoordBuffer(texCoordData.at(0));
     indexCount = (int)indicesData.at(0).size();
+    
+    MTL::TextureDescriptor *textureDescriptor = MTL::TextureDescriptor::alloc()->init();
+    textureDescriptor->setPixelFormat(MTL::PixelFormatRGBA8Unorm);
+    textureDescriptor->setHeight(NS::UInteger(imageHeight));
+    textureDescriptor->setWidth(NS::UInteger(imageWidth));
+    
+    pTexture = pDevice->newTexture(textureDescriptor);
+    textureDescriptor->release();
+    
+    MTL::Region region = MTL::Region::Make2D(0, 0, imageWidth, imageHeight);
+    int bytesPerPixel = 4;
+    int bytesPerRow = imageWidth * bytesPerPixel;
+    
+    pTexture->replaceRegion(region, 0, 0, imageData.at(0).data(), NS::UInteger(bytesPerRow), NS::UInteger(0));
 }

@@ -19,10 +19,13 @@ class Model {
 private:
     MTL::Buffer *pModelBuffer = nullptr;
     MTL::Buffer *pIndexBuffer = nullptr;
+    MTL::Buffer *pTexCoordBuffer = nullptr;
+    MTL::Texture *pTexture = nullptr;
     MTL::Device *pDevice;
     int indexCount;
 
     void createPositionBuffer(std::vector<simd::float3>& vertexPosition);
+    void createTexCoordBuffer(std::vector<simd::float2>& vertexTexCoord);
     void createIndexBuffer(std::vector<unsigned int>& vertexIndices);
     std::string getFileURL(std::string fileName);
     void loadModel(std::string fileURL);

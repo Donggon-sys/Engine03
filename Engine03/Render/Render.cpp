@@ -53,7 +53,8 @@ void Render::draw(CA::MetalLayer *layer) {
     pCamera->setAspect(static_cast<float>(viewPortSize.x) / static_cast<float>(viewPortSize.y));
     pScene->setViewProjectionMatrix(pCamera->getViewProjectionMatrix());
     pScene->renderScene(_pEncoder);
-    
+    _pEncoder->setCullMode(MTL::CullModeBack);
+    _pEncoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
     _pEncoder->endEncoding();
     pCommandBuffer->presentDrawable(_pDrawable);
     pCommandBuffer->commit();

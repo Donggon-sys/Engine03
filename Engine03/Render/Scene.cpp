@@ -25,7 +25,7 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
     encoder->setRenderPipelineState(PSO);
-    encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBuffer));
+    encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));
     for (Model& model : modelList) {
         model.renderModel(encoder);
     }
@@ -48,8 +48,13 @@ void Scene::createPipelineState(MTL::Device *device, MTL::Library *library) {
     MTL::VertexDescriptor *vertexDescriptor = MTL::VertexDescriptor::alloc()->init();
     vertexDescriptor->attributes()->object(NS::UInteger(0))->setFormat(MTL::VertexFormatFloat3);
     vertexDescriptor->attributes()->object(NS::UInteger(0))->setOffset(NS::UInteger(0));
-    vertexDescriptor->attributes()->object(NS::UInteger(0))->setBufferIndex(NS::UInteger(vertexPositionBuffer));
+    vertexDescriptor->attributes()->object(NS::UInteger(0))->setBufferIndex(NS::UInteger(vertexPositionBufferIndex));
     vertexDescriptor->layouts()->object(NS::UInteger(0))->setStride(NS::UInteger(sizeof(simd::float3)));
+    
+    vertexDescriptor->attributes()->object(NS::UInteger(1))->setFormat(MTL::VertexFormatFloat2);
+    vertexDescriptor->attributes()->object(NS::UInteger(1))->setOffset(NS::UInteger(0));
+    vertexDescriptor->attributes()->object(NS::UInteger(1))->setBufferIndex(NS::UInteger(vertexTexCoordBufferIndex));
+    vertexDescriptor->layouts()->object(NS::UInteger(1))->setStride(NS::UInteger(sizeof(simd::float2)));
     
     descriptor->setVertexDescriptor(vertexDescriptor);
 
