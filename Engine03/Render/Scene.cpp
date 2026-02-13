@@ -17,14 +17,16 @@ Scene::~Scene() {
 
 void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
+    createDepthStencilState(device);
     Model m1 = Model(device);
-    m1.openFile("ball.glb");
+    m1.openFile("cube.glb");
     
     modelList.push_back(std::move(m1));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
     encoder->setRenderPipelineState(PSO);
+    encoder->setDepthStencilState(depthStencilState);
     encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));
     for (Model& model : modelList) {
         model.renderModel(encoder);
@@ -33,6 +35,14 @@ void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
 
 void Scene::setViewProjectionMatrix(simd::float4x4 matrix) {
     viewProjectionMatrix = matrix;
+}
+
+void Scene::createDepthStencilState(MTL::Device *device) {
+    MTL::DepthStencilDescriptor *descriptor = MTL::DepthStencilDescriptor::alloc()->init();
+    descriptor->setDepthCompareFunction(MTL::CompareFunctionLess);
+    descriptor->setDepthWriteEnabled(true);
+    depthStencilState = device->newDepthStencilState(descriptor);
+    descriptor->release();
 }
 
 void Scene::createPipelineState(MTL::Device *device, MTL::Library *library) {
@@ -57,6 +67,7 @@ void Scene::createPipelineState(MTL::Device *device, MTL::Library *library) {
     vertexDescriptor->layouts()->object(NS::UInteger(1))->setStride(NS::UInteger(sizeof(simd::float2)));
     
     descriptor->setVertexDescriptor(vertexDescriptor);
+    descriptor->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
 
     NS::Error *error;
     PSO = device->newRenderPipelineState(descriptor, &error);

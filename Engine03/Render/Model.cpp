@@ -19,18 +19,10 @@ Model::Model(MTL::Device *device) {
 }
 
 Model::~Model() {
-    if (pIndexBuffer != nullptr) {
-        pIndexBuffer->release();
-    }
-    if (pModelBuffer != nullptr) {
-        pModelBuffer->release();
-    }
-    if (pTexCoordBuffer != nullptr) {
-        pTexCoordBuffer->release();
-    }
-    if (pTexture != nullptr) {
-        pTexture->release();
-    }
+    pIndexBuffer->release();
+    pModelBuffer->release();
+    pTexCoordBuffer->release();
+    pTexture->release();
 }
 
 Model::Model(Model &&other) {
@@ -193,6 +185,7 @@ void Model::loadModel(std::string fileURL) {
                         
                         imageWidth = img.width;
                         imageHeight = img.height;
+//                        std::cout << "pixel_type: " << img.pixel_type << std::endl;
                         imageData.insert({meshIndex, imgData});
                     }
                 }else {

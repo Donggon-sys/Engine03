@@ -21,8 +21,10 @@ private:
     MTL::Library *pLibrary;
     MTL::CommandQueue *pCommandQueue;
     MTL::CommandBuffer *pCommandBuffer;
+    MTL::Texture *pDepthTexture;
     simd::uint2 viewPortSize;
     MTL::RenderPassDescriptor *createRenderPassDescriptor(CA::MetalDrawable *drawable);
+    void createDepthtexture();
     
 public:
     Render(CA::MetalLayer *layer);

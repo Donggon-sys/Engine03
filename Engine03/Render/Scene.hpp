@@ -17,7 +17,9 @@ private:
     std::vector<Model> modelList;
     simd::float4x4 viewProjectionMatrix;
     MTL::RenderPipelineState *PSO;
+    MTL::DepthStencilState *depthStencilState;
     
+    void createDepthStencilState(MTL::Device *device);
     void createPipelineState(MTL::Device *device, MTL::Library *library);
     
 public:

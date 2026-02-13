@@ -17,11 +17,26 @@ Render::Render(CA::MetalLayer *layer) {
     pScene = new Scene();
     pScene->createScene(pDevice, pLibrary);
     pCamera = new Camera();
+    
+    createDepthtexture();
 }
 
 Render::~Render() {
     delete pScene;
     delete pCamera;
+    pDepthTexture->release();
+}
+
+void Render::createDepthtexture() {
+    if (pDepthTexture) {
+        pDepthTexture->release();
+        pDepthTexture = nullptr;
+    }
+    
+    MTL::TextureDescriptor *textureDescriptor = MTL::TextureDescriptor::texture2DDescriptor(MTL::PixelFormatDepth32Float, NS::UInteger(viewPortSize.x * 2), NS::UInteger(viewPortSize.y * 2), false);
+    textureDescriptor->setUsage(MTL::TextureUsageRenderTarget);
+    textureDescriptor->setStorageMode(MTL::StorageModePrivate);
+    pDepthTexture = pDevice->newTexture(textureDescriptor);
 }
 
 MTL::RenderPassDescriptor *Render::createRenderPassDescriptor(CA::MetalDrawable *drawable) {
@@ -30,6 +45,11 @@ MTL::RenderPassDescriptor *Render::createRenderPassDescriptor(CA::MetalDrawable 
     targetRenderPassDescriptor->colorAttachments()->object(NS::UInteger(0))->setLoadAction(MTL::LoadActionClear);
     targetRenderPassDescriptor->colorAttachments()->object(NS::UInteger(0))->setClearColor(MTL::ClearColor(0.0f, 0.0f, 0.0f, 1.0f));
     targetRenderPassDescriptor->colorAttachments()->object(NS::UInteger(0))->setStoreAction(MTL::StoreActionStore);
+    
+    targetRenderPassDescriptor->depthAttachment()->setTexture(pDepthTexture);
+    targetRenderPassDescriptor->depthAttachment()->setLoadAction(MTL::LoadActionClear);
+    targetRenderPassDescriptor->depthAttachment()->setStoreAction(MTL::StoreActionDontCare);
+    targetRenderPassDescriptor->depthAttachment()->setClearDepth(1.0);
     
     return targetRenderPassDescriptor;
 }
@@ -71,6 +91,8 @@ void Render::changeSize(int *width, int *height) {
     
     viewPortSize.x = Uwidth;
     viewPortSize.y = Uheight;
+    
+    createDepthtexture();
 }
 
 void Render::mouse(float delatX, float delatY) {

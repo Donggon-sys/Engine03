@@ -15,6 +15,7 @@ using namespace metal;
                                    texture2d<float> texture[[texture(1)]]) {
     constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
     float4 out = texture.sample(textureSampler, in.texCoord);
+//    out.z = 1.0f;
     return out;
 }
 
