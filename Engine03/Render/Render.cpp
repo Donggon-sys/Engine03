@@ -18,6 +18,7 @@ Render::Render(CA::MetalLayer *layer) {
     pScene->createScene(pDevice, pLibrary);
     pCamera = new Camera();
     
+    pDepthTexture = nullptr;
     createDepthtexture();
 }
 
@@ -25,6 +26,8 @@ Render::~Render() {
     delete pScene;
     delete pCamera;
     pDepthTexture->release();
+    pLibrary->release();
+    pCommandQueue->release();
 }
 
 void Render::createDepthtexture() {
@@ -37,6 +40,7 @@ void Render::createDepthtexture() {
     textureDescriptor->setUsage(MTL::TextureUsageRenderTarget);
     textureDescriptor->setStorageMode(MTL::StorageModePrivate);
     pDepthTexture = pDevice->newTexture(textureDescriptor);
+    textureDescriptor->release();
 }
 
 MTL::RenderPassDescriptor *Render::createRenderPassDescriptor(CA::MetalDrawable *drawable) {
@@ -72,9 +76,9 @@ void Render::draw(CA::MetalLayer *layer) {
     //TODO: 使用encoder去编码命令,以后使用scene中的函数，提过传入encoder实现
     pCamera->setAspect(static_cast<float>(viewPortSize.x) / static_cast<float>(viewPortSize.y));
     pScene->setViewProjectionMatrix(pCamera->getViewProjectionMatrix());
-    pScene->renderScene(_pEncoder);
     _pEncoder->setCullMode(MTL::CullModeBack);
-    _pEncoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
+//    _pEncoder->setFrontFacingWinding(MTL::WindingClockwise);
+    pScene->renderScene(_pEncoder);
     _pEncoder->endEncoding();
     pCommandBuffer->presentDrawable(_pDrawable);
     pCommandBuffer->commit();

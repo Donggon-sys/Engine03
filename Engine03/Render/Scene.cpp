@@ -24,15 +24,15 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     modelList.push_back(std::move(m1));
     
     Model m2 = Model(device);
-    m2.openFile("ground01.glb");
+    m2.openFile("ground.glb");
     modelList.push_back(std::move(m2));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
-    encoder->setRenderPipelineState(PSO);
-    encoder->setDepthStencilState(depthStencilState);
-    encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));
     for (Model& model : modelList) {
+        encoder->setRenderPipelineState(PSO);
+        encoder->setDepthStencilState(depthStencilState);
+        encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));
         model.renderModel(encoder);
     }
 }
