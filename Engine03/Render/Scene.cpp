@@ -18,10 +18,14 @@ Scene::~Scene() {
 void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
     createDepthStencilState(device);
-    Model m1 = Model(device);
-    m1.openFile("cube.glb");
     
+    Model m1 = Model(device);
+    m1.openFile("ball01.glb");
     modelList.push_back(std::move(m1));
+    
+    Model m2 = Model(device);
+    m2.openFile("ground01.glb");
+    modelList.push_back(std::move(m2));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
