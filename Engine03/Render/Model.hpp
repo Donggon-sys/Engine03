@@ -15,7 +15,7 @@
 
 #include "Shader/ShaderType.h"
 
-class Model {
+class SModel {
 private:
     MTL::Buffer *pModelBuffer = nullptr;
     MTL::Buffer *pIndexBuffer = nullptr;
@@ -31,14 +31,14 @@ private:
     void loadModel(std::string fileURL);
     
 public:
-    Model(MTL::Device *device);
-    ~Model();
+    SModel(MTL::Device *device);
+    ~SModel();
     //赋值
-    Model(const Model &other) = delete;
-    Model& operator=(Model &other) = delete;
+    SModel(const SModel &other) = delete;
+    SModel& operator=(SModel &other) = delete;
     //移动
-    Model(Model &&other);
-    Model& operator=(Model &&other);
+    SModel(SModel &&other);
+    SModel& operator=(SModel &&other);
     
     void renderModel(MTL::RenderCommandEncoder *encoder);
     void openFile(std::string fileName);

@@ -14,7 +14,7 @@
 
 class Scene {
 private:
-    std::vector<Model> modelList;
+    std::vector<SModel> modelList;
     simd::float4x4 viewProjectionMatrix;
     MTL::RenderPipelineState *PSO;
     MTL::DepthStencilState *depthStencilState;

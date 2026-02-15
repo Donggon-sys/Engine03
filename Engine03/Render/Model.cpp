@@ -14,18 +14,18 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <tinygltf/tiny_gltf.h>
 
-Model::Model(MTL::Device *device) {
+SModel::SModel(MTL::Device *device) {
     pDevice = device;
 }
 
-Model::~Model() {
+SModel::~SModel() {
     pIndexBuffer->release();
     pModelBuffer->release();
     pTexCoordBuffer->release();
     pTexture->release();
 }
 
-Model::Model(Model &&other) {
+SModel::SModel(SModel &&other) {
     pModelBuffer = other.pModelBuffer;
     other.pModelBuffer = nullptr;
     
@@ -41,7 +41,7 @@ Model::Model(Model &&other) {
     indexCount = other.indexCount;
 }
 
-Model& Model::operator=(Model &&other) {
+SModel& SModel::operator=(SModel &&other) {
     if (this != &other) {
         if (pModelBuffer) {
             pModelBuffer->release();
@@ -63,35 +63,35 @@ Model& Model::operator=(Model &&other) {
     return *this;
 }
 
-void Model::renderModel(MTL::RenderCommandEncoder *encoder) {
+void SModel::renderModel(MTL::RenderCommandEncoder *encoder) {
     encoder->setVertexBuffer(pModelBuffer, NS::UInteger(0), NS::UInteger(vertexPositionBufferIndex));
     encoder->setVertexBuffer(pTexCoordBuffer, NS::UInteger(0), NS::UInteger(vertexTexCoordBufferIndex));
     encoder->setFragmentTexture(pTexture, 1);
     encoder->drawIndexedPrimitives(MTL::PrimitiveTypeTriangle, NS::UInteger(indexCount), MTL::IndexTypeUInt32, pIndexBuffer, NS::UInteger(0), NS::UInteger(1));
 }
 
-void Model::openFile(std::string fileName) {
+void SModel::openFile(std::string fileName) {
     loadModel(getFileURL(fileName));
 }
 
-std::string Model::getFileURL(std::string fileName) {
+std::string SModel::getFileURL(std::string fileName) {
     std::string bundlePath = NS::Bundle::mainBundle()->resourcePath()->utf8String();
     return bundlePath + "/" + fileName;
 }
 
-void Model::createPositionBuffer(std::vector<simd::float3>& vertexPosition) {
+void SModel::createPositionBuffer(std::vector<simd::float3>& vertexPosition) {
     pModelBuffer = pDevice->newBuffer(vertexPosition.data(), vertexPosition.size() * sizeof(simd::float3),  MTL::StorageModeShared);
 }
 
-void Model::createIndexBuffer(std::vector<unsigned int>& vertexIndices) {
+void SModel::createIndexBuffer(std::vector<unsigned int>& vertexIndices) {
     pIndexBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::StorageModeShared);
 }
 
-void Model::createTexCoordBuffer(std::vector<simd::float2>& vertexTexCoord) {
+void SModel::createTexCoordBuffer(std::vector<simd::float2>& vertexTexCoord) {
     pTexCoordBuffer = pDevice->newBuffer(vertexTexCoord.data(), vertexTexCoord.size() * sizeof(simd::float2), MTL::StorageModeShared);
 }
 
-void Model::loadModel(std::string fileURL) {
+void SModel::loadModel(std::string fileURL) {
     std::map<int, std::vector<simd::float3>> vertexData;
     std::map<int, std::vector<simd::float2>> texCoordData;
     std::map<int, std::vector<unsigned int>> indicesData;

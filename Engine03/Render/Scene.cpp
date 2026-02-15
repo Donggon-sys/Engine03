@@ -19,17 +19,17 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
     createDepthStencilState(device);
     
-    Model m1 = Model(device);
+    SModel m1 = SModel(device);
     m1.openFile("ball01.glb");
     modelList.push_back(std::move(m1));
     
-    Model m2 = Model(device);
+    SModel m2 = SModel(device);
     m2.openFile("ground.glb");
     modelList.push_back(std::move(m2));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
-    for (Model& model : modelList) {
+    for (SModel& model : modelList) {
         encoder->setRenderPipelineState(PSO);
         encoder->setDepthStencilState(depthStencilState);
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));

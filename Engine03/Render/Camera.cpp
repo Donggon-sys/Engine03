@@ -14,7 +14,7 @@ Camera::Camera() {
     zFar = 100;
     sensitivity = 0.005f;
     
-    position = simd::make_float3(0.0f, 0.0f, 3.0f);
+    position = simd::make_float3(3.0f, 3.0f, 3.0f);
     orientation = simd::quatf(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
