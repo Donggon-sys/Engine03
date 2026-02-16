@@ -24,9 +24,24 @@ Node::Node():
 }
 
 Node::~Node() {
+    if (mesh) {
+        delete mesh;
+    }
     for (Node* child : children) {
         delete child;
     }
+}
+
+void Node::setTranslation(simd::float4 v) {
+    translation = v.xyz;
+}
+
+void Node::setScale(simd::float4 v) {
+    scale = v.xyz;
+}
+
+void Node::setRotation(simd::quatf v) {
+    rotation = v;
 }
 
 Node::Node(Node &&other):

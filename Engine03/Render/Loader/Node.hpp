@@ -43,4 +43,8 @@ public:
     void addChildren(Node *child);
     simd::float4x4 getLocalMatrix();
     simd::float4x4 getWorldMatrix();
+    
+    void setTranslation(simd::float4 v);
+    void setScale(simd::float4 v);
+    void setRotation(simd::quatf v);
 };

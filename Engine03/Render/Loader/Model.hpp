@@ -9,6 +9,7 @@
 
 #include "Mesh.hpp"
 #include "Skin.hpp"
+#include "Node.hpp"
 #include "Animation.hpp"
 #include <string>
 
@@ -17,6 +18,7 @@ class Model {
 private:
     std::vector<Mesh> meshes;
     std::vector<Skin> skins;
+    std::vector<Node *> nodes;
     std::vector<Animation> animations;
     
     MTL::Device *pDevice;
