@@ -6,6 +6,7 @@
 //
 
 #include "Model.hpp"
+#include <simd/simd.h>
 #include <iostream>
 
 namespace mtlgltf {
@@ -18,23 +19,23 @@ namespace mtlgltf {
     }
 
     BoundingBox BoundingBox::getAABB(simd::float4x4 m) {
-        simd::float3 min = simd::make_float3(m.columns[3]);
+        simd::float3 min = simd::make_float3(m.columns[3][0], m.columns[3][1], m.columns[3][2]);
         simd::float3 max = min;
         simd::float3 v0, v1;
         
-        simd::float3 right = simd::make_float3(m.columns[0]);
+        simd::float3 right = simd::make_float3(m.columns[0][0], m.columns[0][1], m.columns[0][2]);
         v0 = right * this->min.x;
         v1 = right * this->max.x;
         min += simd::min(v0, v1);
         max += simd::max(v0, v1);
         
-        simd::float3 up = simd::make_float3(m.columns[1]);
+        simd::float3 up = simd::make_float3(m.columns[1][0], m.columns[1][1], m.columns[1][2]);
         v0 = up * this->min.y;
         v1 = up * this->max.y;
         min += simd::min(v0, v1);
         max += simd::max(v0, v1);
         
-        simd::float3 back = simd::make_float3(m.columns[2]);
+        simd::float3 back = simd::make_float3(m.columns[2][0], m.columns[2][1], m.columns[2][2]);
         v0 = back * this->min.z;
         v1 = back * this->max.z;
         min += simd::min(v0, v1);
@@ -124,7 +125,7 @@ namespace mtlgltf {
         textureDes->setHeight(NS::UInteger(height));
         textureDes->setPixelFormat(format);
         textureDes->setTextureType(MTL::TextureType2D);
-        textureDes->setStorageMode(MTL::StorageModePrivate);
+        textureDes->setStorageMode(MTL::StorageModeShared);
         textureDes->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsagePixelFormatView);
         textureDes->setMipmapLevelCount(NS::UInteger(mipLevels));
         image = device->newTexture(textureDes);
@@ -522,22 +523,55 @@ namespace mtlgltf {
                     // TODO: 把获取的数据丢到结构体Vertex里
                     for (size_t v = 0; v < posAccessor.count; v++) {
                         Vertex &vert = loaderInfo.vertexBuffer[loaderInfo.vertexPos];
-                        vert.pos = simd::make_float3(&bufferPos[v * posBufferStride]);
-                        vert.normal = simd::normalize(bufferNormals ? simd::make_float3(&bufferNormals[v * normBufferStride]) : simd::make_float3(0.0f, 0.0f, 0.0f));
-                        vert.uv0 = bufferTexCoordSet0 ? simd::make_float2(&bufferTexCoordSet0[v * uv0BufferStride]) : simd::make_float2(0.0f, 0.0f);
-                        vert.uv1 = bufferTexCoordSet1 ? simd::make_float2(&bufferTexCoordSet0[v * uv1BufferStride]) : simd::make_float2(0.0f, 0.0f);
-                        vert.color = bufferColorSet0 ? simd::make_float4(&bufferColorSet0[v * color0BufferStride]) : simd::make_float4(0.0f, 0.0f, 1.0f, 1.0f);
+                        {
+                            const float *pos = &bufferPos[v * posBufferStride];
+                            vert.pos = simd::make_float3(pos[0], pos[1], pos[2]);
+                        }
+//                        vert.normal = simd::normalize(bufferNormals ? simd::make_float3(&bufferNormals[v * normBufferStride]) : simd::make_float3(0.0f, 0.0f, 0.0f));
+                        if (bufferNormals) {
+                            const float *pNormal = &bufferNormals[v * normBufferStride];
+                            vert.normal = simd::make_float3(pNormal[0], pNormal[1], pNormal[2]);
+                        } else {
+                            vert.normal = simd::make_float3(0.0f, 0.0f, 0.0f);
+                        }
+//                        vert.uv0 = bufferTexCoordSet0 ? simd::make_float2(&bufferTexCoordSet0[v * uv0BufferStride]) : simd::make_float2(0.0f, 0.0f);
+                        if (bufferTexCoordSet0) {
+                            const float *uv0 = &bufferTexCoordSet0[v * uv0BufferStride];
+                            vert.uv0 = simd::make_float2(uv0[0], uv0[1]);
+                        } else {
+                            vert.uv0 = simd::make_float2(0.0f, 0.0f);
+                        }
+//                        vert.uv1 = bufferTexCoordSet1 ? simd::make_float2(&bufferTexCoordSet0[v * uv1BufferStride]) : simd::make_float2(0.0f, 0.0f);
+                        if (bufferTexCoordSet1) {
+                            const float *uv1 = &bufferTexCoordSet1[v * uv1BufferStride];
+                            vert.uv1 = simd::make_float2(uv1[0], uv1[1]);
+                        } else {
+                            vert.uv1 = simd::make_float2(0.0f, 0.0f);
+                        }
+//                        vert.color = bufferColorSet0 ? simd::make_float4(&bufferColorSet0[v * color0BufferStride]) : simd::make_float4(0.0f, 0.0f, 1.0f, 1.0f);
+                        if (bufferColorSet0) {
+                            const float *col = &bufferTexCoordSet1[v * uv1BufferStride];
+                            vert.color = simd::make_float4(col[0], col[1], col[2], col[3]);
+                        } else {
+                            vert.color = simd::make_float4(0.0f, 0.0f, 1.0f, 1.0f);
+                        }
                         
                         if (hasSkin) {
                             switch (jointComponentTpye) {
                                 case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
                                     const uint16_t *buf = static_cast<const uint16_t *>(bufferJoints);
-                                    vert.joint0 = simd::make_uint4(&buf[v * jointBufferStride]);
+//                                    vert.joint0 = simd::make_uint4(&buf[v * jointBufferStride]);
+                                    {
+                                        vert.joint0 = simd::make_uint4(buf[0], buf[1], buf[2], buf[3]);
+                                    }
                                     break;
                                 }
                                 case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
                                     const uint8_t *buf = static_cast<const uint8_t *>(bufferJoints);
-                                    vert.joint0 = simd::make_uint4(&buf[v * jointBufferStride]);
+//                                    vert.joint0 = simd::make_uint4(&buf[v * jointBufferStride]);
+                                    {
+                                        vert.joint0 = simd::make_uint4(buf[0], buf[1], buf[2], buf[3]);
+                                    }
                                     break;
                                 }
                                 default:
@@ -546,7 +580,13 @@ namespace mtlgltf {
                         } else {
                             vert.joint0 = simd::make_uint4(0.0f, 0.0f, 0.0f, 0.0f);
                         }
-                        vert.weight0 = hasSkin ? simd::make_float4(&bufferWeights[v * weightBufferStride]) : simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f);
+//                        vert.weight0 = hasSkin ? simd::make_float4(&bufferWeights[v * weightBufferStride]) : simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f);
+                        if (hasSkin) {
+                            const float *weight = &bufferWeights[v * weightBufferStride];
+                            vert.weight0 = simd::make_float4(weight[0], weight[1], weight[2], weight[3]);
+                        } else {
+                            vert.weight0 = simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f);
+                        }
                         
                         if (simd::length(vert.weight0) == 0.0f) {
                             vert.weight0 = simd::make_float4(1.0f, 0.0f, 0.0f, 0.0f);
@@ -692,7 +732,7 @@ namespace mtlgltf {
                 textureSampler = textureSamplers[tex.sampler];
             }
             Texture texture;
-            texture.fromgltfImage(image, NULL, textureSampler, device, queue);
+            texture.fromgltfImage(image, "", textureSampler, device, queue);
             textures.push_back(texture);
         }
     }

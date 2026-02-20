@@ -21,15 +21,18 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     
     SModel m1 = SModel(device);
     m1.openFile("ball01.glb");
-    modelList.push_back(std::move(m1));
+    smodelList.push_back(std::move(m1));
     
     SModel m2 = SModel(device);
     m2.openFile("ground.glb");
-    modelList.push_back(std::move(m2));
+    smodelList.push_back(std::move(m2));
+    
+    mtlgltf::Model mod1 = mtlgltf::Model();
+    mod1.loadModel(device, "ball01.glb", device->newCommandQueue(), 1.0f);
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
-    for (SModel& model : modelList) {
+    for (SModel& model : smodelList) {
         encoder->setRenderPipelineState(PSO);
         encoder->setDepthStencilState(depthStencilState);
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));

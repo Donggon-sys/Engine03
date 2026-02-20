@@ -9,12 +9,14 @@
 
 #include <vector>
 #include <simd/simd.h>
+#include "Model/Model.hpp"
 #include "Model.hpp"
 #include "Shader/ShaderType.h"
 
 class Scene {
 private:
-    std::vector<SModel> modelList;
+    std::vector<SModel> smodelList;
+    std::vector<mtlgltf::Model> modelList;
     simd::float4x4 viewProjectionMatrix;
     MTL::RenderPipelineState *PSO;
     MTL::DepthStencilState *depthStencilState;

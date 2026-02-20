@@ -34,7 +34,9 @@ private:
     
 public:
     AnimationSampler();
-    ~AnimationSampler();
+    ~AnimationSampler() {
+        
+    };
     simd::float4 cubicSplineInterpolation(size_t index, float time, uint32_t stride);
     void translate(size_t index, float time, Node *node);
     void scale(size_t index, float time, Node *node);
