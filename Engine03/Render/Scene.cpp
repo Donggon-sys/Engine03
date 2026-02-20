@@ -8,11 +8,13 @@
 #include "Scene.hpp"
 
 Scene::Scene() {
-
+    pCamera = new Camera();
 }
 
 Scene::~Scene() {
     modelList.clear();
+    PSOList.clear();
+    delete pCamera;
 }
 
 void Scene::createScene(MTL::Device *device, MTL::Library *library) {
@@ -29,11 +31,13 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     
     mtlgltf::Model mod1 = mtlgltf::Model();
     mod1.loadModel(device, "ball01.glb", device->newCommandQueue(), 1.0f);
+    modelList.push_back(std::move(mod1));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
+    viewProjectionMatrix = pCamera->getViewProjectionMatrix();
     for (SModel& model : smodelList) {
-        encoder->setRenderPipelineState(PSO);
+        encoder->setRenderPipelineState(PSOList.at(MaterialType::DEFAULT));
         encoder->setDepthStencilState(depthStencilState);
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));
         model.renderModel(encoder);
@@ -53,34 +57,63 @@ void Scene::createDepthStencilState(MTL::Device *device) {
 }
 
 void Scene::createPipelineState(MTL::Device *device, MTL::Library *library) {
-    MTL::Function *vertexShader = library->newFunction(NS::String::string("vertexShader", NS::UTF8StringEncoding));
-    MTL::Function *fragmentShader = library->newFunction(NS::String::string("fragmentShader", NS::UTF8StringEncoding));
-    
-    MTL::RenderPipelineDescriptor *descriptor = MTL::RenderPipelineDescriptor::alloc()->init();
-    descriptor->setLabel(NS::String::string("model Rendering Pipeline", NS::UTF8StringEncoding));
-    descriptor->setVertexFunction(vertexShader);
-    descriptor->setFragmentFunction(fragmentShader);
-    descriptor->colorAttachments()->object(NS::UInteger(0))->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
-    
-    MTL::VertexDescriptor *vertexDescriptor = MTL::VertexDescriptor::alloc()->init();
-    vertexDescriptor->attributes()->object(NS::UInteger(0))->setFormat(MTL::VertexFormatFloat3);
-    vertexDescriptor->attributes()->object(NS::UInteger(0))->setOffset(NS::UInteger(0));
-    vertexDescriptor->attributes()->object(NS::UInteger(0))->setBufferIndex(NS::UInteger(vertexPositionBufferIndex));
-    vertexDescriptor->layouts()->object(NS::UInteger(0))->setStride(NS::UInteger(sizeof(simd::float3)));
-    
-    vertexDescriptor->attributes()->object(NS::UInteger(1))->setFormat(MTL::VertexFormatFloat2);
-    vertexDescriptor->attributes()->object(NS::UInteger(1))->setOffset(NS::UInteger(0));
-    vertexDescriptor->attributes()->object(NS::UInteger(1))->setBufferIndex(NS::UInteger(vertexTexCoordBufferIndex));
-    vertexDescriptor->layouts()->object(NS::UInteger(1))->setStride(NS::UInteger(sizeof(simd::float2)));
-    
-    descriptor->setVertexDescriptor(vertexDescriptor);
-    descriptor->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
+    // TODO: 创建默认PSO
+    {
+        MTL::Function *vertexShader = library->newFunction(NS::String::string("vertexShader", NS::UTF8StringEncoding));
+        MTL::Function *fragmentShader = library->newFunction(NS::String::string("fragmentShader", NS::UTF8StringEncoding));
+        
+        MTL::RenderPipelineDescriptor *descriptor = MTL::RenderPipelineDescriptor::alloc()->init();
+        descriptor->setLabel(NS::String::string("model Rendering Pipeline", NS::UTF8StringEncoding));
+        descriptor->setVertexFunction(vertexShader);
+        descriptor->setFragmentFunction(fragmentShader);
+        descriptor->colorAttachments()->object(NS::UInteger(0))->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+        
+        MTL::VertexDescriptor *vertexDescriptor = MTL::VertexDescriptor::alloc()->init();
+        vertexDescriptor->attributes()->object(NS::UInteger(0))->setFormat(MTL::VertexFormatFloat3);
+        vertexDescriptor->attributes()->object(NS::UInteger(0))->setOffset(NS::UInteger(0));
+        vertexDescriptor->attributes()->object(NS::UInteger(0))->setBufferIndex(NS::UInteger(vertexPositionBufferIndex));
+        vertexDescriptor->layouts()->object(NS::UInteger(0))->setStride(NS::UInteger(sizeof(simd::float3)));
+        
+        vertexDescriptor->attributes()->object(NS::UInteger(1))->setFormat(MTL::VertexFormatFloat2);
+        vertexDescriptor->attributes()->object(NS::UInteger(1))->setOffset(NS::UInteger(0));
+        vertexDescriptor->attributes()->object(NS::UInteger(1))->setBufferIndex(NS::UInteger(vertexTexCoordBufferIndex));
+        vertexDescriptor->layouts()->object(NS::UInteger(1))->setStride(NS::UInteger(sizeof(simd::float2)));
+        
+        descriptor->setVertexDescriptor(vertexDescriptor);
+        descriptor->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
 
-    NS::Error *error;
-    PSO = device->newRenderPipelineState(descriptor, &error);
-    
-    vertexDescriptor->release();
-    descriptor->release();
-    vertexShader->release();
-    fragmentShader->release();
+        NS::Error *error;
+        MTL::RenderPipelineState *PSO = device->newRenderPipelineState(descriptor, &error);
+        
+        vertexDescriptor->release();
+        descriptor->release();
+        vertexShader->release();
+        fragmentShader->release();
+        
+        PSOList.insert({MaterialType::DEFAULT, PSO});
+    }
+}
+
+void Scene::setViewPortSize(simd::uint2 v) {
+    pCamera->setAspect(static_cast<float>(v.x) / static_cast<float>(v.y));
+}
+
+void Scene::goForward() {
+    pCamera->goForward();
+}
+
+void Scene::goBack() {
+    pCamera->goBack();
+}
+
+void Scene::moveLeft() {
+    pCamera->moveLeft();
+}
+
+void Scene::moveRight() {
+    pCamera->moveRight();
+}
+
+void Scene::setMouse(float deltaX, float deltaY) {
+    pCamera->mouse(deltaX, deltaY);
 }

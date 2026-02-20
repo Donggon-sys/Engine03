@@ -16,7 +16,6 @@ Render::Render(CA::MetalLayer *layer) {
     //TODO: 创建对应的buffer,以后是在scene中处理buffer的
     pScene = new Scene();
     pScene->createScene(pDevice, pLibrary);
-    pCamera = new Camera();
     
     pDepthTexture = nullptr;
     createDepthtexture();
@@ -24,7 +23,6 @@ Render::Render(CA::MetalLayer *layer) {
 
 Render::~Render() {
     delete pScene;
-    delete pCamera;
     pDepthTexture->release();
     pLibrary->release();
     pCommandQueue->release();
@@ -74,8 +72,7 @@ void Render::draw(CA::MetalLayer *layer) {
     MTL::RenderCommandEncoder *_pEncoder = pCommandBuffer->renderCommandEncoder(_pTargetRenderPassDescriptor);
     
     //TODO: 使用encoder去编码命令,以后使用scene中的函数，提过传入encoder实现
-    pCamera->setAspect(static_cast<float>(viewPortSize.x) / static_cast<float>(viewPortSize.y));
-    pScene->setViewProjectionMatrix(pCamera->getViewProjectionMatrix());
+    pScene->setViewPortSize(viewPortSize);
     _pEncoder->setCullMode(MTL::CullModeBack);
 //    _pEncoder->setFrontFacingWinding(MTL::WindingClockwise);
     pScene->renderScene(_pEncoder);
@@ -100,21 +97,21 @@ void Render::changeSize(int *width, int *height) {
 }
 
 void Render::mouse(float delatX, float delatY) {
-    pCamera->mouse(delatX, delatY);
+    pScene->setMouse(delatX, delatY);
 }
 
 void Render::goForward() {
-    pCamera->goForward();
+    pScene->goForward();
 }
 
 void Render::goBack() {
-    pCamera->goBack();
+    pScene->goBack();
 }
 
 void Render::moveLeft() {
-    pCamera->moveLeft();
+    pScene->moveLeft();
 }
 
 void Render::moveRight() {
-    pCamera->moveRight();
+    pScene->moveRight();
 }

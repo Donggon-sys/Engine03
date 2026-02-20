@@ -697,13 +697,14 @@ namespace mtlgltf {
             if (source.inverseBindMatrices > -1) {
                 const tinygltf::Accessor &accessor = model.accessors[source.inverseBindMatrices];
                 const tinygltf::BufferView &view = model.bufferViews[accessor.bufferView];
-                const float *m = reinterpret_cast<const float *>(model.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]);
+                const tinygltf::Buffer &buffer = model.buffers[view.buffer];
+                const float *m = reinterpret_cast<const float *>(&buffer.data[accessor.byteOffset + view.byteOffset]);
                 
                 for (size_t i = 0; i < accessor.count; i++) {
-                    newSkin->inverseBindMatrices.push_back(simd::float4x4(simd::make_float4(m[0], m[4], m[8], m[12]),
-                                                                          simd::make_float4(m[1], m[5], m[9], m[13]),
-                                                                          simd::make_float4(m[2], m[6], m[10], m[14]),
-                                                                          simd::make_float4(m[3], m[7], m[11], m[15])));
+                    newSkin->inverseBindMatrices.push_back(simd::float4x4(simd::make_float4(m[0], m[1], m[2], m[3]),
+                                                                          simd::make_float4(m[4], m[5], m[6], m[7]),
+                                                                          simd::make_float4(m[8], m[9], m[10], m[11]),
+                                                                          simd::make_float4(m[12], m[13], m[14], m[15])));
                     m = m + 16;
                 }
             }

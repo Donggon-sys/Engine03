@@ -16,7 +16,6 @@
 class Render {
 private:
     Scene *pScene;
-    Camera *pCamera;
     MTL::Device *pDevice;
     MTL::Library *pLibrary;
     MTL::CommandQueue *pCommandQueue;
