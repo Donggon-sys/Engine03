@@ -55,11 +55,11 @@ struct Material {
     float roughnessFactor = 1.0f;
     simd::float4 baseColorFactor = simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f);
     simd::float4 emissiveFactor = simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f);
-    Texture *baseColorTexture;
-    Texture *metallicRoughnessTexture;
-    Texture *normalTexture;
-    Texture *occlusionTexture;
-    Texture *emissiveTexture;
+    Texture *baseColorTexture = nullptr;
+    Texture *metallicRoughnessTexture = nullptr;
+    Texture *normalTexture = nullptr;
+    Texture *occlusionTexture = nullptr;
+    Texture *emissiveTexture = nullptr;
     bool doubleSided = false;
     struct TexCoordSets {
         uint8_t baseColor = 0;
@@ -70,8 +70,8 @@ struct Material {
         uint8_t emissive = 0;
     } texCoordSets;
     struct Extension {
-        Texture *specularGlossinessTexture;
-        Texture *diffuseTexture;
+        Texture *specularGlossinessTexture = nullptr;
+        Texture *diffuseTexture = nullptr;
         simd::float4 diffuseFactor = simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f);
         simd::float3 specularFactor = simd::make_float3(0.0f, 0.0f, 0.0f);
     } extension;
@@ -126,7 +126,7 @@ struct Node {
     simd::float3 translation = simd::make_float3(0.0f, 0.0f, 0.0f);
     simd::float3 scale = simd::make_float3(1.0f, 1.0f, 1.0f);
     simd::quatf rotation = simd::quatf(0.0f, 0.0f, 0.0f, 1.0f);
-    BoundingBox bb, aabb;
+    BoundingBox bvh, aabb;
     bool useCacheMatrix { false };
     simd::float4x4 cachedLocalMatrix{ simd::float4x4(1.0f) };
     simd::float4x4 cachedMatrix{ simd::float4x4(1.0f) };
@@ -165,8 +165,9 @@ struct Animation {
 
 class Model {
 private:
+    MTL::Device *pDevice;
     struct Vertex {
-        simd::float3 position;
+        simd::float3 pos;
         simd::float3 normal;
         simd::float2 uv0;
         simd::float2 uv1;
@@ -174,28 +175,34 @@ private:
         simd::float4 weight0;
         simd::float4 color;
     };
-    simd::float4 aabb;
+    struct LoaderInfo {
+        uint32_t *indexBuffer;
+        Vertex *vertexBuffer;
+        size_t indexPos = 0;
+        size_t vertexPos = 0;
+    };
+    simd::float4x4 aabb;
     std::vector<Node *> nodes;
     std::vector<Node *> linearNodes;
     std::vector<Skin *> skins;
-    std::vector<Texture *> textures;
-    std::vector<TextureSampler *> textureSamplers;
-    std::vector<Material *> materials;
-    std::vector<Animation *> animations;
+    std::vector<Texture> textures;
+    std::vector<TextureSampler> textureSamplers;
+    std::vector<Material> materials;
+    std::vector<Animation> animations;
     std::vector<std::string> extensions;
     
     struct Dimensions {
         simd::float3 min = simd::make_float3(FLT_MAX, FLT_MAX, FLT_MAX);
         simd::float3 max = simd::make_float3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-    };
+    } dimensions;
     MTL::Buffer *pVerticesBuffer = nullptr;
     MTL::Buffer *pIndicesBuffer = nullptr;
     
-    void loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, float globalscale);
+    void loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, LoaderInfo& loaderInfo, float globalscale);
     void getNodeProps(const tinygltf::Node &node, const tinygltf::Model &model, size_t &vertexCount, size_t &indexCount);
     void loadSkin(tinygltf::Model &model);
     void drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder);
-    void loadTexture(tinygltf::Model &model, MTL::Device *device);
+    void loadTexture(tinygltf::Model &model, MTL::Device *device, MTL::CommandQueue *queue);
     void loadTextureSamplers(tinygltf::Model &model);
     void loadMaterials(tinygltf::Model &model);
     void loadAnimation(tinygltf::Model &model);
@@ -204,6 +211,8 @@ private:
     void updateAnimation(uint32_t index, float time);
     Node* fineNode(Node *parent, uint32_t index);
     Node* nodeFromIndex(uint32_t index);
+    MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
+    MTL::SamplerAddressMode getWarpMode(int32_t warpMode);
     
 public:
     Model();
@@ -213,7 +222,7 @@ public:
     Model(Model &&other);
     Model& operator=(Model &&other);
     
-    void loadModel(MTL::Device *device, std::string fileName);
+    void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
     void draw(MTL::RenderCommandEncoder *pEncoder);
 };
 }
