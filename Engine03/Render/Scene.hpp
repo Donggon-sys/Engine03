@@ -17,7 +17,7 @@
 class Scene {
 private:
     Camera *pCamera;
-    enum MaterialType {DEFAULT};
+    enum MaterialType {DEFAULT, SPECIAL};
     std::vector<SModel> smodelList;
     std::vector<mtlgltf::Model> modelList;
     simd::float4x4 viewProjectionMatrix;

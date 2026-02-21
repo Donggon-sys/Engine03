@@ -336,7 +336,13 @@ namespace mtlgltf {
 
     Model::~Model() {
         pIndicesBuffer->release();
-        pVerticesBuffer->release();
+        pPositionBuffer->release();
+        pNormalBuffer->release();
+        pTexCoord0Buffer->release();
+        pTexCoord1Buffer->release();
+        pColorBuffer->release();
+        pJointsBuffer->release();
+        pWeightsBuffer->release();
         
         for (Texture texure : textures) {
             texure.destroy();
@@ -370,9 +376,22 @@ namespace mtlgltf {
         extensions = std::move(other.extensions);
         
         pIndicesBuffer = other.pIndicesBuffer;
-        pVerticesBuffer = other.pVerticesBuffer;
+        pPositionBuffer = other.pPositionBuffer;
+        pNormalBuffer = other.pNormalBuffer;
+        pTexCoord0Buffer = other.pTexCoord0Buffer;
+        pTexCoord1Buffer = other.pTexCoord1Buffer;
+        pColorBuffer = other.pColorBuffer;
+        pJointsBuffer = other.pJointsBuffer;
+        pWeightsBuffer = other.pWeightsBuffer;
+        
         other.pIndicesBuffer = nullptr;
-        other.pVerticesBuffer = nullptr;
+        other.pPositionBuffer = nullptr;
+        other.pNormalBuffer = nullptr;
+        other.pTexCoord0Buffer = nullptr;
+        other.pTexCoord1Buffer = nullptr;
+        other.pColorBuffer = nullptr;
+        other.pJointsBuffer = nullptr;
+        other.pWeightsBuffer = nullptr;
     }
 
     Model& Model::operator=(Model &&other) {
@@ -389,14 +408,27 @@ namespace mtlgltf {
             extensions = std::move(other.extensions);
             
             pIndicesBuffer = other.pIndicesBuffer;
-            pVerticesBuffer = other.pVerticesBuffer;
+            pPositionBuffer = other.pPositionBuffer;
+            pNormalBuffer = other.pNormalBuffer;
+            pTexCoord0Buffer = other.pTexCoord0Buffer;
+            pTexCoord1Buffer = other.pTexCoord1Buffer;
+            pColorBuffer = other.pColorBuffer;
+            pJointsBuffer = other.pJointsBuffer;
+            pWeightsBuffer = other.pWeightsBuffer;
+            
             other.pIndicesBuffer = nullptr;
-            other.pVerticesBuffer = nullptr;
+            other.pPositionBuffer = nullptr;
+            other.pNormalBuffer = nullptr;
+            other.pTexCoord0Buffer = nullptr;
+            other.pTexCoord1Buffer = nullptr;
+            other.pColorBuffer = nullptr;
+            other.pJointsBuffer = nullptr;
+            other.pWeightsBuffer = nullptr;
         }
         return *this;
     }
 
-    void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, LoaderInfo& loaderInfo, float globalscale) {
+    void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, float globalscale) {
         Node *newNode = new Node{ };
         newNode->index = nodeIndex;
         newNode->parent = parent;
@@ -426,7 +458,7 @@ namespace mtlgltf {
         
         if (node.children.size() > 0) {
             for (size_t i = 0; i < node.children.size(); i++) {
-                loadNode(newNode, model.nodes[node.children[i]], node.children[i], model, loaderInfo, globalscale);
+                loadNode(newNode, model.nodes[node.children[i]], node.children[i], model, globalscale);
             }
         }
         
@@ -435,8 +467,8 @@ namespace mtlgltf {
             Mesh *newMesh = new Mesh(newNode->matrix);
             for (size_t j = 0; j < mesh.primitives.size(); j++) {
                 const tinygltf::Primitive &primitive = mesh.primitives[j];
-                uint32_t vertexStart = static_cast<uint32_t>(loaderInfo.vertexPos);
-                uint32_t indexStart = static_cast<uint32_t>(loaderInfo.indexPos);
+                uint32_t vertexStart = 0;
+                uint32_t indexStart = 0;
                 uint32_t indexCount = 0;
                 uint32_t vertexCount = 0;
                 simd::float3 posMin {0.0f, 0.0f, 0.0f};
@@ -522,55 +554,52 @@ namespace mtlgltf {
                     
                     // TODO: 把获取的数据丢到结构体Vertex里
                     for (size_t v = 0; v < posAccessor.count; v++) {
-                        Vertex &vert = loaderInfo.vertexBuffer[loaderInfo.vertexPos];
                         {
                             const float *pos = &bufferPos[v * posBufferStride];
-                            vert.pos = simd::make_float3(pos[0], pos[1], pos[2]);
+                            this->position.push_back(simd::make_float3(pos[0], pos[1], pos[2]));
                         }
-//                        vert.normal = simd::normalize(bufferNormals ? simd::make_float3(&bufferNormals[v * normBufferStride]) : simd::make_float3(0.0f, 0.0f, 0.0f));
+                        
                         if (bufferNormals) {
                             const float *pNormal = &bufferNormals[v * normBufferStride];
-                            vert.normal = simd::make_float3(pNormal[0], pNormal[1], pNormal[2]);
+                            this->normal.push_back(simd::make_float3(pNormal[0], pNormal[1], pNormal[2]));
                         } else {
-                            vert.normal = simd::make_float3(0.0f, 0.0f, 0.0f);
+                            this->normal.push_back(simd::make_float3(0.0f, 0.0f, 0.0f));
                         }
-//                        vert.uv0 = bufferTexCoordSet0 ? simd::make_float2(&bufferTexCoordSet0[v * uv0BufferStride]) : simd::make_float2(0.0f, 0.0f);
+                        
                         if (bufferTexCoordSet0) {
                             const float *uv0 = &bufferTexCoordSet0[v * uv0BufferStride];
-                            vert.uv0 = simd::make_float2(uv0[0], uv0[1]);
+                            this->uv0.push_back(simd::make_float2(uv0[0], uv0[1]));
                         } else {
-                            vert.uv0 = simd::make_float2(0.0f, 0.0f);
+                            this->uv0.push_back(simd::make_float2(0.0f, 0.0f));
                         }
-//                        vert.uv1 = bufferTexCoordSet1 ? simd::make_float2(&bufferTexCoordSet0[v * uv1BufferStride]) : simd::make_float2(0.0f, 0.0f);
+                        
                         if (bufferTexCoordSet1) {
                             const float *uv1 = &bufferTexCoordSet1[v * uv1BufferStride];
-                            vert.uv1 = simd::make_float2(uv1[0], uv1[1]);
+                            this->uv1.push_back(simd::make_float2(uv1[0], uv1[1]));
                         } else {
-                            vert.uv1 = simd::make_float2(0.0f, 0.0f);
+                            this->uv1.push_back(simd::make_float2(0.0f, 0.0f));
                         }
-//                        vert.color = bufferColorSet0 ? simd::make_float4(&bufferColorSet0[v * color0BufferStride]) : simd::make_float4(0.0f, 0.0f, 1.0f, 1.0f);
+                        
                         if (bufferColorSet0) {
                             const float *col = &bufferTexCoordSet1[v * uv1BufferStride];
-                            vert.color = simd::make_float4(col[0], col[1], col[2], col[3]);
+                            this->color.push_back(simd::make_float4(col[0], col[1], col[2], col[3]));
                         } else {
-                            vert.color = simd::make_float4(0.0f, 0.0f, 1.0f, 1.0f);
+                            this->color.push_back(simd::make_float4(0.0f, 0.0f, 1.0f, 1.0f));
                         }
                         
                         if (hasSkin) {
                             switch (jointComponentTpye) {
                                 case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
                                     const uint16_t *buf = static_cast<const uint16_t *>(bufferJoints);
-//                                    vert.joint0 = simd::make_uint4(&buf[v * jointBufferStride]);
                                     {
-                                        vert.joint0 = simd::make_uint4(buf[0], buf[1], buf[2], buf[3]);
+                                        this->joint0.push_back(simd::make_uint4(buf[0], buf[1], buf[2], buf[3]));
                                     }
                                     break;
                                 }
                                 case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
                                     const uint8_t *buf = static_cast<const uint8_t *>(bufferJoints);
-//                                    vert.joint0 = simd::make_uint4(&buf[v * jointBufferStride]);
                                     {
-                                        vert.joint0 = simd::make_uint4(buf[0], buf[1], buf[2], buf[3]);
+                                        this->joint0.push_back(simd::make_uint4(buf[0], buf[1], buf[2], buf[3]));
                                     }
                                     break;
                                 }
@@ -578,20 +607,19 @@ namespace mtlgltf {
                                     break;
                             }
                         } else {
-                            vert.joint0 = simd::make_uint4(0.0f, 0.0f, 0.0f, 0.0f);
-                        }
-//                        vert.weight0 = hasSkin ? simd::make_float4(&bufferWeights[v * weightBufferStride]) : simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f);
-                        if (hasSkin) {
-                            const float *weight = &bufferWeights[v * weightBufferStride];
-                            vert.weight0 = simd::make_float4(weight[0], weight[1], weight[2], weight[3]);
-                        } else {
-                            vert.weight0 = simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f);
+                            this->joint0.push_back(simd::make_uint4(0.0f, 0.0f, 0.0f, 0.0f));
                         }
                         
-                        if (simd::length(vert.weight0) == 0.0f) {
-                            vert.weight0 = simd::make_float4(1.0f, 0.0f, 0.0f, 0.0f);
+                        if (hasSkin) {
+                            const float *weight = &bufferWeights[v * weightBufferStride];
+                            this->weight0.push_back(simd::make_float4(weight[0], weight[1], weight[2], weight[3]));
+                        } else {
+                            this->weight0.push_back(simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f));
                         }
-                        loaderInfo.vertexPos++;
+                        
+                        if (simd::length(this->weight0.back()) == 0.0f) {
+                            this->weight0.push_back(simd::make_float4(1.0f, 0.0f, 0.0f, 0.0f));
+                        }
                     }
                     
                     // TODO: 处理index
@@ -606,27 +634,24 @@ namespace mtlgltf {
                         switch (accessor.componentType) {
                             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: {
                                 const uint32_t *buf = static_cast<const uint32_t *>(dataPtr);
-                                for (size_t index = 0; index < accessor.count; index++) {
-                                    loaderInfo.indexBuffer[loaderInfo.indexPos] = buf[index] + vertexStart;
-                                    loaderInfo.indexPos++;
+                                for (int i = 0; i < accessor.count; i++) {
+                                    vertexIndices.push_back(buf[i]);
                                 }
                                 break;
                             }
                                 
                             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
                                 const uint16_t *buf = static_cast<const uint16_t *>(dataPtr);
-                                for (size_t index = 0; index < accessor.count; index++) {
-                                    loaderInfo.indexBuffer[loaderInfo.indexPos] = buf[index] + vertexStart;
-                                    loaderInfo.indexPos++;
+                                for (int i = 0; i < accessor.count; i++) {
+                                    vertexIndices.push_back(buf[i]);
                                 }
                                 break;
                             }
                                 
                             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
                                 const uint8_t *buf = static_cast<const uint8_t *>(dataPtr);
-                                for (size_t index = 0; index < accessor.count; index++) {
-                                    loaderInfo.indexBuffer[loaderInfo.indexPos] = buf[index] + vertexStart;
-                                    loaderInfo.indexPos++;
+                                for (int i = 0; i < accessor.count; i++) {
+                                    vertexIndices.push_back(buf[i]);
                                 }
                                 break;
                             }
@@ -1071,14 +1096,12 @@ namespace mtlgltf {
         tinygltf::Model model;
         tinygltf::TinyGLTF loader;
         std::string error, warning;
-        LoaderInfo loaderInfo{ };
         size_t vertexCount = 0;
         size_t indexCount = 0;
         pDevice = device;
         
         bool rel = loader.LoadBinaryFromFile(&model, &error, &warning, filePath);
         if (rel) {
-//            extensions = model.extensionsUsed;
             loadTextureSamplers(model);
             loadTexture(model, pDevice, queue);
             loadMaterials(model);
@@ -1088,12 +1111,10 @@ namespace mtlgltf {
             for (size_t index = 0; index < scene.nodes.size(); index++) {
                 getNodeProps(model.nodes[scene.nodes[index]], model, vertexCount, indexCount);
             }
-            loaderInfo.vertexBuffer = new Vertex[vertexCount];
-            loaderInfo.indexBuffer = new uint32_t[indexCount];
             
             for (size_t i = 0; i < scene.nodes.size(); i++) {
                 const tinygltf::Node &node = model.nodes[scene.nodes[i]];
-                loadNode(nullptr, node, scene.nodes[i], model, loaderInfo, scale);
+                loadNode(nullptr, node, scene.nodes[i], model, scale);
             }
             if (model.animations.size() > 0) {
                 loadAnimation(model);
@@ -1116,21 +1137,23 @@ namespace mtlgltf {
         }
         
         size_t vertexBufferSize = vertexCount * sizeof(Vertex);
-        size_t indexBufferSize = indexCount * sizeof(uint32_t);
         
         assert(vertexBufferSize > 0);
-        
-        pVerticesBuffer = pDevice->newBuffer(loaderInfo.vertexBuffer, vertexBufferSize, MTL::ResourceStorageModeShared);
-        pIndicesBuffer = pDevice->newBuffer(loaderInfo.indexBuffer, indexBufferSize, MTL::ResourceStorageModeShared);
-        
-        delete [] loaderInfo.indexBuffer;
-        delete [] loaderInfo.vertexBuffer;
+
+        pPositionBuffer = pDevice->newBuffer(position.data(), position.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
+        pNormalBuffer = pDevice->newBuffer(normal.data(), normal.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
+        pTexCoord0Buffer = pDevice->newBuffer(uv0.data(), uv0.size() * sizeof(simd::float2), MTL::ResourceStorageModeShared);
+        pTexCoord1Buffer = pDevice->newBuffer(uv1.data(), uv1.size() * sizeof(simd::float2), MTL::ResourceStorageModeShared);
+        pJointsBuffer = pDevice->newBuffer(joint0.data(), joint0.size() * sizeof(simd::uint4), MTL::ResourceStorageModeShared);
+        pWeightsBuffer = pDevice->newBuffer(weight0.data(), weight0.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
+        pColorBuffer = pDevice->newBuffer(color.data(), color.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
+        pIndicesBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::ResourceStorageModeShared);
     }
 
     void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         if (node->mesh) {
             for (Primitive *primitive : node->mesh->primitives) {
-                pEncoder->setVertexBuffer(pVerticesBuffer, NS::UInteger(0), NS::UInteger(0));
+                pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
             }
         }
         for (auto child : node->children) {
@@ -1139,6 +1162,13 @@ namespace mtlgltf {
     }
 
     void Model::draw(MTL::RenderCommandEncoder *pEncoder) {
+        pEncoder->setVertexBuffer(pPositionBuffer, NS::UInteger(0), NS::UInteger(0));
+        pEncoder->setVertexBuffer(pNormalBuffer, NS::UInteger(0), NS::UInteger(1));
+        pEncoder->setVertexBuffer(pTexCoord0Buffer, NS::UInteger(0), NS::UInteger(2));
+        pEncoder->setVertexBuffer(pTexCoord1Buffer, NS::UInteger(0), NS::UInteger(3));
+        pEncoder->setVertexBuffer(pJointsBuffer, NS::UInteger(0), NS::UInteger(4));
+        pEncoder->setVertexBuffer(pWeightsBuffer, NS::UInteger(0), NS::UInteger(5));
+        pEncoder->setVertexBuffer(pColorBuffer, NS::UInteger(0), NS::UInteger(6));
         for (auto &node : nodes) {
             drawNode(node, pEncoder);
         }
