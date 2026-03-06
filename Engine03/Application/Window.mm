@@ -96,7 +96,7 @@ void Window::enterFullScreen() {
 Window::Window() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    pWindow = glfwCreateWindow(640, 400, "window", NULL, NULL);
+    pWindow = glfwCreateWindow(800, 600, "window", NULL, NULL);
     
     if (!pWindow) {
         glfwTerminate();
@@ -113,7 +113,7 @@ Window::Window() {
     
     isInit = false;
 //    glfwMaximizeWindow(pWindow);
-    enterFullScreen();
+//    enterFullScreen();
 }
 
 Window::~Window() {

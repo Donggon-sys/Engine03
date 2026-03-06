@@ -44,7 +44,7 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     smodelList.push_back(std::move(m2));
     
     mtlgltf::Model mod1 = mtlgltf::Model();
-    mod1.loadModel(device, "ball02.glb", device->newCommandQueue(), 1.0f);
+    mod1.loadModel(device, "jiaonan.glb", device->newCommandQueue(), 1.0f);
     modelList.push_back(std::move(mod1));
 }
 

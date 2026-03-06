@@ -231,8 +231,8 @@ namespace mtlgltf {
                 size_t numJoints = std::min((uint32_t)skin->joints.size(), MAX_NUM_JOINTS);
                 for (size_t i = 0; i < numJoints; i++) {
                     Node *jointNode = skin->joints[i];
-                    simd::float4x4 jointMat = inverseTransform * jointNode->getMatrix();
-                    jointMat = jointMat * skin->inverseBindMatrices[i];
+                    simd::float4x4 jointMat = jointNode->getMatrix() * skin->inverseBindMatrices[i];
+                    jointMat = inverseTransform * jointMat;
 //                    simd::float4x4 jointMat = jointNode->getMatrix() * skin->inverseBindMatrices[i];
 //                    jointMat = inverseTransform * jointMat;
                     mesh->jointMatrix[i] = jointMat;
@@ -1066,6 +1066,8 @@ namespace mtlgltf {
             return;
         }
         Animation &animation = animations[index];
+        
+//        std::cout << "Animation time range: " << animation.start << " ~ " << animation.end << std::endl;
         
         bool update = false;
         for (auto &channel : animation.channels) {
