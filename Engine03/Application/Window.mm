@@ -84,16 +84,19 @@ bool Window::shouldDraw() {
 }
 
 void Window::enterFullScreen() {
-    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+//    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+//    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+//    
+//    glfwSetWindowMonitor(pWindow, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     
-    glfwSetWindowMonitor(pWindow, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    NSWindow *window = glfwGetCocoaWindow(pWindow);
+    [window toggleFullScreen:nil];
 }
 
 Window::Window() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    pWindow = glfwCreateWindow(800, 600, "window", NULL, NULL);
+    pWindow = glfwCreateWindow(640, 400, "window", NULL, NULL);
     
     if (!pWindow) {
         glfwTerminate();
@@ -109,8 +112,8 @@ Window::Window() {
     pRender = new RenderAdapter(pLayer);
     
     isInit = false;
-    glfwMaximizeWindow(pWindow);
-//    enterFullScreen();
+//    glfwMaximizeWindow(pWindow);
+    enterFullScreen();
 }
 
 Window::~Window() {
