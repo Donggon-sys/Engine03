@@ -28,6 +28,7 @@ private:
 public:
     Render(CA::MetalLayer *layer);
     ~Render();
+    void update(float deltaTime);
     void draw(CA::MetalLayer *layer);
     void changeSize(int *width, int *height);
     void goForward();

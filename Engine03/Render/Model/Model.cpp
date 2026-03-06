@@ -183,7 +183,8 @@ namespace mtlgltf {
             t.columns[3][1] = this->translation[1];
             t.columns[3][2] = this->translation[2];
             
-            simd::float4x4 r = simd::float4x4(this->rotation);
+//            simd::float4x4 r = simd::float4x4(this->rotation);
+            simd::float4x4 r = simd_matrix4x4(this->rotation);
             
             simd::float4x4 s = simd::float4x4(1.0f);
             s.columns[0][0] = this->scale[0];
@@ -195,19 +196,29 @@ namespace mtlgltf {
     }
 
     simd::float4x4 Node::getMatrix() {
-        if (!useCacheMatrix) {
-            simd::float4x4 m = localMatrix();
-            Node *p = parent;
-            while (p) {
-                m = p->localMatrix() * m;
-                p = p->parent;
+//        if (!useCacheMatrix) {
+//            simd::float4x4 m = localMatrix();
+//            Node *p = parent;
+//            while (p) {
+//                m = p->localMatrix() * m;
+//                p = p->parent;
+//            }
+//            cachedMatrix = m;
+//            useCacheMatrix = true;
+//            return m;
+//        } else {
+//            return cachedMatrix;
+//        }
+            if (!useCacheMatrix) {
+                simd::float4x4 local = localMatrix();
+                if (parent) {
+                    cachedMatrix = parent->getMatrix() * local;  // 父节点强制更新
+                } else {
+                    cachedMatrix = local;
+                }
+                useCacheMatrix = true;
             }
-            cachedMatrix = m;
-            useCacheMatrix = true;
-            return m;
-        } else {
             return cachedMatrix;
-        }
     }
 
     void Node::update() {
@@ -220,8 +231,10 @@ namespace mtlgltf {
                 size_t numJoints = std::min((uint32_t)skin->joints.size(), MAX_NUM_JOINTS);
                 for (size_t i = 0; i < numJoints; i++) {
                     Node *jointNode = skin->joints[i];
-                    simd::float4x4 jointMat = jointNode->getMatrix() * skin->inverseBindMatrices[i];
-                    jointMat = inverseTransform * jointMat;
+                    simd::float4x4 jointMat = inverseTransform * jointNode->getMatrix();
+                    jointMat = jointMat * skin->inverseBindMatrices[i];
+//                    simd::float4x4 jointMat = jointNode->getMatrix() * skin->inverseBindMatrices[i];
+//                    jointMat = inverseTransform * jointMat;
                     mesh->jointMatrix[i] = jointMat;
                 }
                 mesh->jointCount = static_cast<uint32_t>(numJoints);
@@ -343,6 +356,7 @@ namespace mtlgltf {
         pColorBuffer->release();
         pJointsBuffer->release();
         pWeightsBuffer->release();
+        pJointMatrices->release();
         
         for (Texture texure : textures) {
             texure.destroy();
@@ -383,6 +397,7 @@ namespace mtlgltf {
         pColorBuffer = other.pColorBuffer;
         pJointsBuffer = other.pJointsBuffer;
         pWeightsBuffer = other.pWeightsBuffer;
+        pJointMatrices = other.pJointMatrices;
         
         other.pIndicesBuffer = nullptr;
         other.pPositionBuffer = nullptr;
@@ -392,6 +407,7 @@ namespace mtlgltf {
         other.pColorBuffer = nullptr;
         other.pJointsBuffer = nullptr;
         other.pWeightsBuffer = nullptr;
+        other.pJointMatrices = nullptr;
     }
 
     Model& Model::operator=(Model &&other) {
@@ -415,6 +431,7 @@ namespace mtlgltf {
             pColorBuffer = other.pColorBuffer;
             pJointsBuffer = other.pJointsBuffer;
             pWeightsBuffer = other.pWeightsBuffer;
+            pJointMatrices = other.pJointMatrices;
             
             other.pIndicesBuffer = nullptr;
             other.pPositionBuffer = nullptr;
@@ -424,6 +441,7 @@ namespace mtlgltf {
             other.pColorBuffer = nullptr;
             other.pJointsBuffer = nullptr;
             other.pWeightsBuffer = nullptr;
+            other.pJointMatrices = nullptr;
         }
         return *this;
     }
@@ -450,10 +468,10 @@ namespace mtlgltf {
         }
         if (node.matrix.size() == 16) {
             const double *m = node.matrix.data();
-            newNode->matrix = simd::float4x4(simd::make_float4((float)m[0], (float)m[4], (float)m[8], (float)m[12]),
-                                             simd::make_float4((float)m[1], (float)m[5], (float)m[9], (float)m[13]),
-                                             simd::make_float4((float)m[2], (float)m[6], (float)m[10], (float)m[14]),
-                                             simd::make_float4((float)m[3], (float)m[7], (float)m[11], (float)m[15]));
+            newNode->matrix = simd::float4x4(simd::make_float4((float)m[0], (float)m[1], (float)m[2], (float)m[3]),
+                                             simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
+                                             simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
+                                             simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
         }
         
         if (node.children.size() > 0) {
@@ -467,7 +485,7 @@ namespace mtlgltf {
             Mesh *newMesh = new Mesh(newNode->matrix);
             for (size_t j = 0; j < mesh.primitives.size(); j++) {
                 const tinygltf::Primitive &primitive = mesh.primitives[j];
-                uint32_t vertexStart = 0;
+//                uint32_t vertexStart = 0;
                 uint32_t indexStart = 0;
                 uint32_t indexCount = 0;
                 uint32_t vertexCount = 0;
@@ -1148,10 +1166,20 @@ namespace mtlgltf {
         pWeightsBuffer = pDevice->newBuffer(weight0.data(), weight0.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
         pColorBuffer = pDevice->newBuffer(color.data(), color.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
         pIndicesBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::ResourceStorageModeShared);
+        
+        pJointMatrices = pDevice->newBuffer(sizeof(simd::float4x4) * MAX_NUM_JOINTS, MTL::ResourceStorageModeShared);
     }
 
     void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         if (node->mesh) {
+            // TODO: 动画数据进入
+            bool hasSkin = node->skin? true : false;
+            pEncoder->setVertexBytes(&hasSkin, sizeof(bool), NS::UInteger(13));
+            if (hasSkin) {
+                memcpy(pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
+                pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
+            }
+            
             for (Primitive *primitive : node->mesh->primitives) {
                 pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
             }
@@ -1169,7 +1197,10 @@ namespace mtlgltf {
         pEncoder->setVertexBuffer(pJointsBuffer, NS::UInteger(0), NS::UInteger(4));
         pEncoder->setVertexBuffer(pWeightsBuffer, NS::UInteger(0), NS::UInteger(5));
         pEncoder->setVertexBuffer(pColorBuffer, NS::UInteger(0), NS::UInteger(6));
+        
         for (auto &node : nodes) {
+            
+            // TODO: 绘制每个mesh
             drawNode(node, pEncoder);
         }
     }

@@ -16,6 +16,7 @@
 
 class Scene {
 private:
+    float currentTime = 1.0f;
     Camera *pCamera;
     enum MaterialType {DEFAULT, SPECIAL};
     std::vector<SModel> smodelList;
@@ -30,6 +31,7 @@ public:
     Scene();
     ~Scene();
     
+    void update(float deltaTime);
     void setViewPortSize(simd::uint2 v);
     void goForward();
     void goBack();

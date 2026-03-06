@@ -59,6 +59,8 @@ void Window::run() {
         if (shouldDraw()) {
             processInput();
             pRender->changeSize(&width, &height);
+            double currentTime = glfwGetTime();
+            pRender->update(static_cast<float>(currentTime - lastTime));
             pRender->drawInCAMetalLayer(pLayer);
         }
         glfwPollEvents();
@@ -81,6 +83,13 @@ bool Window::shouldDraw() {
     return false;
 }
 
+void Window::enterFullScreen() {
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+    
+    glfwSetWindowMonitor(pWindow, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+}
+
 Window::Window() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -100,6 +109,8 @@ Window::Window() {
     pRender = new RenderAdapter(pLayer);
     
     isInit = false;
+    glfwMaximizeWindow(pWindow);
+//    enterFullScreen();
 }
 
 Window::~Window() {

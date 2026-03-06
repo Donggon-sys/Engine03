@@ -43,3 +43,7 @@ void RenderAdapter::moveLeft() {
 void RenderAdapter::moveRight() {
     pRender->moveRight();
 }
+
+void RenderAdapter::update(float deltaTime) {
+    pRender->update(deltaTime);
+}

@@ -17,6 +17,24 @@ Scene::~Scene() {
     delete pCamera;
 }
 
+//void Scene::update(float deltaTime) {
+//    currentTime += deltaTime;
+//    
+//    for (auto &model : modelList) {
+//        model.updateAnimation(0, currentTime);
+//    }
+//}
+
+void Scene::update(float deltaTime) {
+    currentTime += deltaTime;
+    
+    for (auto &model : modelList) {
+        // 使用 fmod 循环时间，假设动画从 0 开始
+        float animTime = fmod(currentTime, 1.0f);  // 假设动画最长 10 秒，或查询实际长度
+        model.updateAnimation(0, animTime);
+    }
+}
+
 void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
     createDepthStencilState(device);
@@ -26,18 +44,18 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     smodelList.push_back(std::move(m2));
     
     mtlgltf::Model mod1 = mtlgltf::Model();
-    mod1.loadModel(device, "ball01.glb", device->newCommandQueue(), 1.0f);
+    mod1.loadModel(device, "ball02.glb", device->newCommandQueue(), 1.0f);
     modelList.push_back(std::move(mod1));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
     viewProjectionMatrix = pCamera->getViewProjectionMatrix();
-    for (SModel &model : smodelList) {
-        encoder->setRenderPipelineState(PSOList.at(MaterialType::DEFAULT));
-        encoder->setDepthStencilState(depthStencilState);
-        encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));
-        model.renderModel(encoder);
-    }
+//    for (SModel &model : smodelList) {
+//        encoder->setRenderPipelineState(PSOList.at(MaterialType::DEFAULT));
+//        encoder->setDepthStencilState(depthStencilState);
+//        encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));
+//        model.renderModel(encoder);
+//    }
     for (mtlgltf::Model &model : modelList) {
         encoder->setRenderPipelineState(PSOList.at(MaterialType::SPECIAL));
         encoder->setDepthStencilState(depthStencilState);

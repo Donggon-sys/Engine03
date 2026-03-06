@@ -19,6 +19,7 @@ private:
 public:
     RenderAdapter(CA::MetalLayer *layer);
     ~RenderAdapter();
+    void update(float deltaTime);
     void drawInCAMetalLayer(CA::MetalLayer *layer);
     void changeSize(int *width, int *height);
     void goForward();

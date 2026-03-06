@@ -28,6 +28,10 @@ Render::~Render() {
     pCommandQueue->release();
 }
 
+void Render::update(float deltaTime) {
+    pScene->update(deltaTime);
+}
+
 void Render::createDepthtexture() {
     if (pDepthTexture) {
         pDepthTexture->release();

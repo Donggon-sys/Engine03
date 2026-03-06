@@ -193,6 +193,8 @@ private:
     MTL::Buffer *pColorBuffer = nullptr;
     MTL::Buffer *pIndicesBuffer = nullptr;
     
+    MTL::Buffer *pJointMatrices = nullptr;
+    
     MTL::Device *pDevice;
     simd::float4x4 aabb;
     std::vector<Node *> nodes;
@@ -223,6 +225,7 @@ private:
     Node* nodeFromIndex(uint32_t index);
     MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
     MTL::SamplerAddressMode getWarpMode(int32_t warpMode);
+//    void updateJoint(Node *node, std::vector<simd::float4x4 > &m);
     
 public:
     Model();

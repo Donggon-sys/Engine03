@@ -27,6 +27,7 @@ private:
     void setCAMetalLayer();
     bool shouldDraw();
     void processInput();
+    void enterFullScreen();
     
 public:
     void run();
