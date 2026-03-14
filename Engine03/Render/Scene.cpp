@@ -32,6 +32,11 @@ void Scene::update(float deltaTime) {
         // 使用 fmod 循环时间，假设动画从 0 开始
         float animTime = fmod(currentTime, 1.0f);  // 假设动画最长 10 秒，或查询实际长度
         model.updateAnimation(0, animTime);
+        
+        if (currentTime > 2.5f) {
+            currentTime = currentTime - 2.5f;
+        }
+        model.updateAnimation(0, currentTime);
     }
 }
 

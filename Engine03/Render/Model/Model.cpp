@@ -113,6 +113,7 @@ namespace mtlgltf {
         MTL::SamplerDescriptor *samplerDes = MTL::SamplerDescriptor::alloc()->init();
         samplerDes->setMagFilter(textureSampler.magFilter);
         samplerDes->setMinFilter(textureSampler.minFilter);
+        samplerDes->setMipFilter(MTL::SamplerMipFilterLinear);
         samplerDes->setSAddressMode(textureSampler.addressModeU);
         samplerDes->setTAddressMode(textureSampler.addressModeV);
         samplerDes->setRAddressMode(textureSampler.addressModeW);
@@ -126,7 +127,7 @@ namespace mtlgltf {
         textureDes->setPixelFormat(format);
         textureDes->setTextureType(MTL::TextureType2D);
         textureDes->setStorageMode(MTL::StorageModeShared);
-        textureDes->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsagePixelFormatView);
+//        textureDes->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsagePixelFormatView);
         textureDes->setMipmapLevelCount(NS::UInteger(mipLevels));
         image = device->newTexture(textureDes);
         textureDes->release();
@@ -446,7 +447,11 @@ namespace mtlgltf {
         return *this;
     }
 
-    void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, float globalscale) {
+// 下面的程序主要是进行node结构体的创建过程，node的index，node的parent，childrens这些
+// 里面的hasSkin这个不是很正确，应该是hasBone才正确一点
+// Skin 不是 Bone，Skin 是蒙皮配置（包含 inverseBindMatrices + joints 索引数组）-- kimi提供的消息，所以说我上面的想法是错误的
+
+void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, LoaderInfo &loaderInfo, float globalscale) {
         Node *newNode = new Node{ };
         newNode->index = nodeIndex;
         newNode->parent = parent;
@@ -476,7 +481,7 @@ namespace mtlgltf {
         
         if (node.children.size() > 0) {
             for (size_t i = 0; i < node.children.size(); i++) {
-                loadNode(newNode, model.nodes[node.children[i]], node.children[i], model, globalscale);
+                loadNode(newNode, model.nodes[node.children[i]], node.children[i], model, loaderInfo, globalscale);
             }
         }
         
@@ -599,7 +604,7 @@ namespace mtlgltf {
                         }
                         
                         if (bufferColorSet0) {
-                            const float *col = &bufferTexCoordSet1[v * uv1BufferStride];
+                            const float *col = &bufferColorSet0[v * uv1BufferStride];
                             this->color.push_back(simd::make_float4(col[0], col[1], col[2], col[3]));
                         } else {
                             this->color.push_back(simd::make_float4(0.0f, 0.0f, 1.0f, 1.0f));
@@ -638,6 +643,7 @@ namespace mtlgltf {
                         if (simd::length(this->weight0.back()) == 0.0f) {
                             this->weight0.push_back(simd::make_float4(1.0f, 0.0f, 0.0f, 0.0f));
                         }
+                        loaderInfo.vertexPos++;
                     }
                     
                     // TODO: 处理index
@@ -654,6 +660,7 @@ namespace mtlgltf {
                                 const uint32_t *buf = static_cast<const uint32_t *>(dataPtr);
                                 for (int i = 0; i < accessor.count; i++) {
                                     vertexIndices.push_back(buf[i]);
+                                    loaderInfo.indexPos++;
                                 }
                                 break;
                             }
@@ -662,6 +669,7 @@ namespace mtlgltf {
                                 const uint16_t *buf = static_cast<const uint16_t *>(dataPtr);
                                 for (int i = 0; i < accessor.count; i++) {
                                     vertexIndices.push_back(buf[i]);
+                                    loaderInfo.indexPos++;
                                 }
                                 break;
                             }
@@ -670,6 +678,7 @@ namespace mtlgltf {
                                 const uint8_t *buf = static_cast<const uint8_t *>(dataPtr);
                                 for (int i = 0; i < accessor.count; i++) {
                                     vertexIndices.push_back(buf[i]);
+                                    loaderInfo.indexPos++;
                                 }
                                 break;
                             }
@@ -689,7 +698,7 @@ namespace mtlgltf {
                         newMesh->bb.valid = true;
                     }
                     newMesh->bb.min = simd::min(newMesh->bb.min, p->bb.min);
-                    newMesh->bb.max = simd::min(newMesh->bb.max, p->bb.max);
+                    newMesh->bb.max = simd::min(newMesh->bb.min, p->bb.max);
                 }
                 newNode->mesh = newMesh;
             }
@@ -721,6 +730,7 @@ namespace mtlgltf {
         }
     }
 
+// 这里的node需要使用index来找到   nodeFromIndex(jointIndex);
     void Model::loadSkin(tinygltf::Model &model) {
         for (tinygltf::Skin &source : model.skins) {
             Skin *newSkin = new Skin{ };
@@ -732,6 +742,7 @@ namespace mtlgltf {
             
             for (int jointIndex : source.joints) {
                 Node *node = nodeFromIndex(jointIndex);
+                // 防御性编程
                 if (node) {
                     newSkin->joints.push_back(nodeFromIndex(jointIndex));
                 }
@@ -1116,6 +1127,7 @@ namespace mtlgltf {
         tinygltf::Model model;
         tinygltf::TinyGLTF loader;
         std::string error, warning;
+        LoaderInfo loaderInfo{};
         size_t vertexCount = 0;
         size_t indexCount = 0;
         pDevice = device;
@@ -1134,7 +1146,7 @@ namespace mtlgltf {
             
             for (size_t i = 0; i < scene.nodes.size(); i++) {
                 const tinygltf::Node &node = model.nodes[scene.nodes[i]];
-                loadNode(nullptr, node, scene.nodes[i], model, scale);
+                loadNode(nullptr, node, scene.nodes[i], model, loaderInfo, scale);
             }
             if (model.animations.size() > 0) {
                 loadAnimation(model);

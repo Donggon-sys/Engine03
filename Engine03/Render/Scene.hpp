@@ -16,7 +16,7 @@
 
 class Scene {
 private:
-    float currentTime = 1.0f;
+    float currentTime = 0.0f;
     Camera *pCamera;
     enum MaterialType {DEFAULT, SPECIAL};
     std::vector<SModel> smodelList;

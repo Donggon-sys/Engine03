@@ -89,6 +89,7 @@ void Window::enterFullScreen() {
 //    
 //    glfwSetWindowMonitor(pWindow, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     
+    sleep(2.4);
     NSWindow *window = glfwGetCocoaWindow(pWindow);
     [window toggleFullScreen:nil];
 }
@@ -113,7 +114,7 @@ Window::Window() {
     
     isInit = false;
 //    glfwMaximizeWindow(pWindow);
-//    enterFullScreen();
+    enterFullScreen();
 }
 
 Window::~Window() {

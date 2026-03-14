@@ -173,6 +173,13 @@ struct Vertex {
     simd::float4 color;
 };
 
+struct LoaderInfo {
+//    uint32_t* indexBuffer;
+//    Vertex* vertexBuffer;
+    size_t indexPos = 0;
+    size_t vertexPos = 0;
+};
+
 class Model {
 private:
     std::vector<simd::float3> position;
@@ -211,7 +218,7 @@ private:
         simd::float3 max = simd::make_float3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
     } dimensions;
     
-    void loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, float globalscale);
+    void loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, LoaderInfo &loaderInfo, float globalscale);
     void getNodeProps(const tinygltf::Node &node, const tinygltf::Model &model, size_t &vertexCount, size_t &indexCount);
     void loadSkin(tinygltf::Model &model);
     void drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder);
