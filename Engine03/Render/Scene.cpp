@@ -6,6 +6,7 @@
 //
 
 #include "Scene.hpp"
+//#include <iostream>
 
 Scene::Scene() {
     pCamera = new Camera();
@@ -27,17 +28,13 @@ Scene::~Scene() {
 
 void Scene::update(float deltaTime) {
     currentTime += deltaTime;
-    
     for (auto &model : modelList) {
-        if (model.hasAnimation(0)) {
-            if (currentTime < model.getAnimationStartTime(0)) {
-                currentTime = model.getAnimationStartTime(0);
-            }
+        if (model.getAnimationSize() > 0) {
             if (currentTime > model.getAnimationEndTime(0)) {
                 currentTime -= model.getAnimationEndTime(0);
             }
+            model.updateAnimation(0, currentTime);
         }
-        model.updateAnimation(0, currentTime);
     }
 }
 
@@ -50,7 +47,7 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     smodelList.push_back(std::move(m2));
     
     mtlgltf::Model mod1 = mtlgltf::Model();
-    mod1.loadModel(device, "jiaonan.glb", device->newCommandQueue(), 1.0f);
+    mod1.loadModel(device, "cubeAndBall.glb", device->newCommandQueue(), 1.0f);
     modelList.push_back(std::move(mod1));
 }
 

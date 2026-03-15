@@ -248,16 +248,8 @@ public:
     float getAnimationEndTime(uint index) {
         return animations[index].end;
     }
-    bool hasAnimation(uint index) {
-        if (animations.empty()) {
-//            std::cout << "没有动画! " << std::endl;
-            return false;
-        }
-        return true;
-    }
-    
-    float getAnimationStartTime(uint index) {
-        return animations[index].start;
+    size_t getAnimationSize() {
+        return animations.size();
     }
 };
 }

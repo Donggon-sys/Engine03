@@ -1071,7 +1071,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
 
     void Model::updateAnimation(uint32_t index, float time) {
         if (animations.empty()) {
-            std::cout << "没有动画! " << std::endl;
+//            std::cout << "没有动画! " << std::endl;
             return;
         }
         if (index > static_cast<uint32_t>(animations.size()) - 1) {
@@ -1193,8 +1193,8 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             pEncoder->setVertexBytes(&hasSkin, sizeof(bool), NS::UInteger(13));
             if (hasSkin) {
                 memcpy(pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
-                pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
             }
+            pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
             
             for (Primitive *primitive : node->mesh->primitives) {
                 pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
