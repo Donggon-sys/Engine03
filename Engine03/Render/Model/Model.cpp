@@ -1185,6 +1185,8 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             // TODO: 动画数据进入
             bool hasSkin = node->skin? true : false;
             pEncoder->setVertexBytes(&hasSkin, sizeof(bool), NS::UInteger(13));
+            simd::float4x4 transformMatrix = node->getMatrix();
+            pEncoder->setVertexBytes(&transformMatrix, sizeof(simd::float4x4), NS::UInteger(10));
             if (hasSkin) {
                 memcpy(pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
             }

@@ -24,11 +24,12 @@ struct vertexOut {
 };
 
 [[vertex]] vertexOut vertexShader1(vertexIn in [[stage_in]],
+                                   constant float4x4 &transfromMatrix [[buffer(10)]],
                                   constant float4x4 &viewProjectionMatrix [[buffer(11)]],
                                    constant float4x4 *jointMatrices [[buffer(12)]],
                                    
                                    constant bool& hasSkin [[buffer(13)]]) {
-    float4 position = float4(in.pos, 1.0f);
+    float4 position = transfromMatrix * float4(in.pos, 1.0f);
     
 //    if (hasSkin) {
 //        position = in.weight0.x * (jointMatrices[in.joint0.x]) * position +

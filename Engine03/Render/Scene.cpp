@@ -41,14 +41,14 @@ void Scene::update(float deltaTime) {
 void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
     createDepthStencilState(device);
-//    
-//    SModel m2 = SModel(device);
-//    m2.openFile("ground.glb");
-//    smodelList.push_back(std::move(m2));
     
-    mtlgltf::Model mod1 = mtlgltf::Model();
-    mod1.loadModel(device, "cubeAndBall.glb", device->newCommandQueue(), 1.0f);
-    modelList.push_back(std::move(mod1));
+//    mtlgltf::Model mod1 = mtlgltf::Model();
+//    mod1.loadModel(device, "ground01.glb", device->newCommandQueue(), 1.0f);
+//    
+    mtlgltf::Model mod2 = mtlgltf::Model();
+    mod2.loadModel(device, "jiaonan.glb", device->newCommandQueue(), 1.0f);
+//    modelList.push_back(std::move(mod1));
+    modelList.push_back(std::move(mod2));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
