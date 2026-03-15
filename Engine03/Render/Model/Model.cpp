@@ -490,8 +490,8 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             Mesh *newMesh = new Mesh(newNode->matrix);
             for (size_t j = 0; j < mesh.primitives.size(); j++) {
                 const tinygltf::Primitive &primitive = mesh.primitives[j];
-//                uint32_t vertexStart = 0;
-                uint32_t indexStart = 0;
+//                uint32_t vertexStart = static_cast<uint>(loaderInfo.vertexPos);
+                uint32_t indexStart = static_cast<uint>(loaderInfo.indexPos);
                 uint32_t indexCount = 0;
                 uint32_t vertexCount = 0;
                 simd::float3 posMin {0.0f, 0.0f, 0.0f};
@@ -713,24 +713,24 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         linearNodes.push_back(newNode);
         
     }
-
-    void Model::getNodeProps(const tinygltf::Node &node, const tinygltf::Model &model, size_t &vertexCount, size_t &indexCount) {
-        if (node.children.size() > 0) {
-            for (size_t i = 0; i < node.children.size(); i++) {
-                getNodeProps(model.nodes[node.children[i]], model, vertexCount, indexCount);
-            }
-        }
-        if (node.mesh > -1) {
-            const tinygltf::Mesh mesh = model.meshes[node.mesh];
-            for (size_t i = 0; i < mesh.primitives.size(); i++) {
-                const tinygltf::Primitive &primitive = mesh.primitives[i];
-                vertexCount += model.accessors[primitive.attributes.find("POSITION")->second].count;
-                if (primitive.indices > -1) {
-                    indexCount += model.accessors[primitive.indices].count;
-                }
-            }
-        }
-    }
+//
+//    void Model::getNodeProps(const tinygltf::Node &node, const tinygltf::Model &model, size_t &vertexCount, size_t &indexCount) {
+//        if (node.children.size() > 0) {
+//            for (size_t i = 0; i < node.children.size(); i++) {
+//                getNodeProps(model.nodes[node.children[i]], model, vertexCount, indexCount);
+//            }
+//        }
+//        if (node.mesh > -1) {
+//            const tinygltf::Mesh mesh = model.meshes[node.mesh];
+//            for (size_t i = 0; i < mesh.primitives.size(); i++) {
+//                const tinygltf::Primitive &primitive = mesh.primitives[i];
+//                vertexCount += model.accessors[primitive.attributes.find("POSITION")->second].count;
+//                if (primitive.indices > -1) {
+//                    indexCount += model.accessors[primitive.indices].count;
+//                }
+//            }
+//        }
+//    }
 
 // 这里的node需要使用index来找到   nodeFromIndex(jointIndex);
     void Model::loadSkin(tinygltf::Model &model) {
@@ -1130,8 +1130,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         tinygltf::TinyGLTF loader;
         std::string error, warning;
         LoaderInfo loaderInfo{};
-        size_t vertexCount = 0;
-        size_t indexCount = 0;
         pDevice = device;
         
         bool rel = loader.LoadBinaryFromFile(&model, &error, &warning, filePath);
@@ -1142,9 +1140,9 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             
             const tinygltf::Scene &scene = model.scenes[model.defaultScene > 1 ? model.defaultScene : 0];
             
-            for (size_t index = 0; index < scene.nodes.size(); index++) {
-                getNodeProps(model.nodes[scene.nodes[index]], model, vertexCount, indexCount);
-            }
+//            for (size_t index = 0; index < scene.nodes.size(); index++) {
+//                getNodeProps(model.nodes[scene.nodes[index]], model, vertexCount, indexCount);
+//            }
             
             for (size_t i = 0; i < scene.nodes.size(); i++) {
                 const tinygltf::Node &node = model.nodes[scene.nodes[i]];
@@ -1169,10 +1167,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             std::cout << "模型加载失败! " << std::endl;
             return;
         }
-        
-        size_t vertexBufferSize = vertexCount * sizeof(Vertex);
-        
-        assert(vertexBufferSize > 0);
 
         pPositionBuffer = pDevice->newBuffer(position.data(), position.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
         pNormalBuffer = pDevice->newBuffer(normal.data(), normal.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);

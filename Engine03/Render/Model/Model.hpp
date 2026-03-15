@@ -219,7 +219,7 @@ private:
     } dimensions;
     
     void loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, LoaderInfo &loaderInfo, float globalscale);
-    void getNodeProps(const tinygltf::Node &node, const tinygltf::Model &model, size_t &vertexCount, size_t &indexCount);
+//    void getNodeProps(const tinygltf::Node &node, const tinygltf::Model &model, size_t &vertexCount, size_t &indexCount);
     void loadSkin(tinygltf::Model &model);
     void drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder);
     void loadTexture(tinygltf::Model &model, MTL::Device *device, MTL::CommandQueue *queue);
