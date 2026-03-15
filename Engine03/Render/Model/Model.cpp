@@ -564,8 +564,8 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                         const tinygltf::Accessor &accessor = model.accessors[primitive.attributes.find("JOINTS_0")->second];
                         const tinygltf::BufferView &view = model.bufferViews[accessor.bufferView];
                         bufferJoints = reinterpret_cast<const float *>(&(model.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
-                        jointBufferStride = accessor.ByteStride(view) ? (accessor.ByteStride(view) / sizeof(float)) : tinygltf::GetNumComponentsInType(TINYGLTF_TYPE_VEC4);
                         jointComponentTpye = accessor.componentType;
+                        jointBufferStride = accessor.ByteStride(view) ? (accessor.ByteStride(view) / tinygltf::GetComponentSizeInBytes(jointComponentTpye)) : tinygltf::GetNumComponentsInType(TINYGLTF_TYPE_VEC4);
                     }
                     if (primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end()) {
                         const tinygltf::Accessor &accessor = model.accessors[primitive.attributes.find("WEIGHTS_0")->second];
@@ -614,15 +614,17 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                             switch (jointComponentTpye) {
                                 case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
                                     const uint16_t *buf = static_cast<const uint16_t *>(bufferJoints);
+                                    const uint16_t *j = &buf[v * jointBufferStride];
                                     {
-                                        this->joint0.push_back(simd::make_uint4(buf[0], buf[1], buf[2], buf[3]));
+                                        this->joint0.push_back(simd::make_uint4(j[0], j[1], j[2], j[3]));
                                     }
                                     break;
                                 }
                                 case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
                                     const uint8_t *buf = static_cast<const uint8_t *>(bufferJoints);
+                                    const uint8_t *j = &buf[v * jointBufferStride];
                                     {
-                                        this->joint0.push_back(simd::make_uint4(buf[0], buf[1], buf[2], buf[3]));
+                                        this->joint0.push_back(simd::make_uint4(j[0], j[1], j[2], j[3]));
                                     }
                                     break;
                                 }

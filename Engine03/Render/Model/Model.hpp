@@ -160,7 +160,7 @@ struct Animation {
     std::vector<AnimationSampler> samplers;
     std::vector<AnimationChannel> channels;
     float start = std::numeric_limits<float>::max();
-    float end = std::numeric_limits<float>::lowest();
+    float end = std::numeric_limits<float>::min();
 };
 
 struct Vertex {
@@ -245,6 +245,20 @@ public:
     void updateAnimation(uint32_t index, float time);
     void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
     void draw(MTL::RenderCommandEncoder *pEncoder);
+    float getAnimationEndTime(uint index) {
+        return animations[index].end;
+    }
+    bool hasAnimation(uint index) {
+        if (animations.empty()) {
+//            std::cout << "没有动画! " << std::endl;
+            return false;
+        }
+        return true;
+    }
+    
+    float getAnimationStartTime(uint index) {
+        return animations[index].start;
+    }
 };
 }
 
