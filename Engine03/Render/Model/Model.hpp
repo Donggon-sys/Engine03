@@ -174,8 +174,6 @@ struct Vertex {
 };
 
 struct LoaderInfo {
-//    uint32_t* indexBuffer;
-//    Vertex* vertexBuffer;
     size_t indexPos = 0;
     size_t vertexPos = 0;
 };
@@ -232,7 +230,6 @@ private:
     Node* nodeFromIndex(uint32_t index);
     MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
     MTL::SamplerAddressMode getWarpMode(int32_t warpMode);
-//    void updateJoint(Node *node, std::vector<simd::float4x4 > &m);
     
 public:
     Model();
@@ -244,7 +241,7 @@ public:
     
     void updateAnimation(uint32_t index, float time);
     void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
-    void draw(MTL::RenderCommandEncoder *pEncoder);
+    void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);
     float getAnimationEndTime(uint index) {
         return animations[index].end;
     }

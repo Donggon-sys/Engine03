@@ -46,7 +46,7 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
 //    mod1.loadModel(device, "ground01.glb", device->newCommandQueue(), 1.0f);
 //    
     mtlgltf::Model mod2 = mtlgltf::Model();
-    mod2.loadModel(device, "jiaonan.glb", device->newCommandQueue(), 1.0f);
+    mod2.loadModel(device, "cubeAndBall.glb", device->newCommandQueue(), 1.0f);
 //    modelList.push_back(std::move(mod1));
     modelList.push_back(std::move(mod2));
 }
@@ -60,10 +60,10 @@ void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
 //        model.renderModel(encoder);
 //    }
     for (mtlgltf::Model &model : modelList) {
-        encoder->setRenderPipelineState(PSOList.at(MaterialType::SPECIAL));
-        encoder->setDepthStencilState(depthStencilState);
+//        encoder->setRenderPipelineState(PSOList.at(MaterialType::SPECIAL));
+//        encoder->setDepthStencilState(depthStencilState);
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(11));
-        model.draw(encoder);
+        model.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
     }
 }
 

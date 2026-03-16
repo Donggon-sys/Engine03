@@ -490,7 +490,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             Mesh *newMesh = new Mesh(newNode->matrix);
             for (size_t j = 0; j < mesh.primitives.size(); j++) {
                 const tinygltf::Primitive &primitive = mesh.primitives[j];
-//                uint32_t vertexStart = static_cast<uint>(loaderInfo.vertexPos);
+                uint32_t vertexStart = static_cast<uint>(loaderInfo.vertexPos);
                 uint32_t indexStart = static_cast<uint>(loaderInfo.indexPos);
                 uint32_t indexCount = 0;
                 uint32_t vertexCount = 0;
@@ -604,10 +604,10 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                         }
                         
                         if (bufferColorSet0) {
-                            const float *col = &bufferColorSet0[v * uv1BufferStride];
+                            const float *col = &bufferColorSet0[v * color0BufferStride];
                             this->color.push_back(simd::make_float4(col[0], col[1], col[2], col[3]));
                         } else {
-                            this->color.push_back(simd::make_float4(0.0f, 0.0f, 1.0f, 1.0f));
+                            this->color.push_back(simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f));
                         }
                         
                         if (hasSkin) {
@@ -661,7 +661,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: {
                                 const uint32_t *buf = static_cast<const uint32_t *>(dataPtr);
                                 for (int i = 0; i < accessor.count; i++) {
-                                    vertexIndices.push_back(buf[i]);
+                                    vertexIndices.push_back(buf[i] + vertexStart);
                                     loaderInfo.indexPos++;
                                 }
                                 break;
@@ -670,7 +670,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
                                 const uint16_t *buf = static_cast<const uint16_t *>(dataPtr);
                                 for (int i = 0; i < accessor.count; i++) {
-                                    vertexIndices.push_back(buf[i]);
+                                    vertexIndices.push_back(buf[i] + vertexStart);
                                     loaderInfo.indexPos++;
                                 }
                                 break;
@@ -679,7 +679,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
                                 const uint8_t *buf = static_cast<const uint8_t *>(dataPtr);
                                 for (int i = 0; i < accessor.count; i++) {
-                                    vertexIndices.push_back(buf[i]);
+                                    vertexIndices.push_back(buf[i] + vertexStart);
                                     loaderInfo.indexPos++;
                                 }
                                 break;
@@ -713,24 +713,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         linearNodes.push_back(newNode);
         
     }
-//
-//    void Model::getNodeProps(const tinygltf::Node &node, const tinygltf::Model &model, size_t &vertexCount, size_t &indexCount) {
-//        if (node.children.size() > 0) {
-//            for (size_t i = 0; i < node.children.size(); i++) {
-//                getNodeProps(model.nodes[node.children[i]], model, vertexCount, indexCount);
-//            }
-//        }
-//        if (node.mesh > -1) {
-//            const tinygltf::Mesh mesh = model.meshes[node.mesh];
-//            for (size_t i = 0; i < mesh.primitives.size(); i++) {
-//                const tinygltf::Primitive &primitive = mesh.primitives[i];
-//                vertexCount += model.accessors[primitive.attributes.find("POSITION")->second].count;
-//                if (primitive.indices > -1) {
-//                    indexCount += model.accessors[primitive.indices].count;
-//                }
-//            }
-//        }
-//    }
 
 // 这里的node需要使用index来找到   nodeFromIndex(jointIndex);
     void Model::loadSkin(tinygltf::Model &model) {
@@ -739,6 +721,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             newSkin->name = source.name;
             
             if (source.skeleton > -1) {
+                //TODO: 通过findNOdeINdex找到root skin节点
                 newSkin->skeletonRoot = nodeFromIndex(source.skeleton);
             }
             
@@ -1139,11 +1122,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             loadMaterials(model);
             
             const tinygltf::Scene &scene = model.scenes[model.defaultScene > 1 ? model.defaultScene : 0];
-            
-//            for (size_t index = 0; index < scene.nodes.size(); index++) {
-//                getNodeProps(model.nodes[scene.nodes[index]], model, vertexCount, indexCount);
-//            }
-            
+
             for (size_t i = 0; i < scene.nodes.size(); i++) {
                 const tinygltf::Node &node = model.nodes[scene.nodes[i]];
                 loadNode(nullptr, node, scene.nodes[i], model, loaderInfo, scale);
@@ -1186,6 +1165,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             bool hasSkin = node->skin? true : false;
             pEncoder->setVertexBytes(&hasSkin, sizeof(bool), NS::UInteger(13));
             simd::float4x4 transformMatrix = node->getMatrix();
+
             pEncoder->setVertexBytes(&transformMatrix, sizeof(simd::float4x4), NS::UInteger(10));
             if (hasSkin) {
                 memcpy(pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
@@ -1201,7 +1181,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         }
     }
 
-    void Model::draw(MTL::RenderCommandEncoder *pEncoder) {
+    void Model::draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState) {
         pEncoder->setVertexBuffer(pPositionBuffer, NS::UInteger(0), NS::UInteger(0));
         pEncoder->setVertexBuffer(pNormalBuffer, NS::UInteger(0), NS::UInteger(1));
         pEncoder->setVertexBuffer(pTexCoord0Buffer, NS::UInteger(0), NS::UInteger(2));
@@ -1209,10 +1189,10 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         pEncoder->setVertexBuffer(pJointsBuffer, NS::UInteger(0), NS::UInteger(4));
         pEncoder->setVertexBuffer(pWeightsBuffer, NS::UInteger(0), NS::UInteger(5));
         pEncoder->setVertexBuffer(pColorBuffer, NS::UInteger(0), NS::UInteger(6));
-        
         for (auto &node : nodes) {
-            
             // TODO: 绘制每个mesh
+            pEncoder->setRenderPipelineState(pipelineState);
+            pEncoder->setDepthStencilState(depthStencilState);
             drawNode(node, pEncoder);
         }
     }
