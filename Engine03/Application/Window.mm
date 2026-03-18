@@ -54,16 +54,20 @@ void Window::run() {
     int width, height;
     lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(pWindow)) {
+        glfwPollEvents();
+        if (!hasFullScreen) {
+            hasFullScreen = true;
+            enterFullScreen();
+        }
         glfwGetWindowSize(pWindow, &width, &height);
         
         if (shouldDraw()) {
             processInput();
             pRender->changeSize(&width, &height);
             double currentTime = glfwGetTime();
-            pRender->update(static_cast<float>(currentTime - lastTime));
+            pRender->update(static_cast<float>(1 / 60.0f));
             pRender->drawInCAMetalLayer(pLayer);
         }
-        glfwPollEvents();
     }
 }
 
@@ -114,7 +118,6 @@ Window::Window() {
     
     isInit = false;
 //    glfwMaximizeWindow(pWindow);
-    enterFullScreen();
 }
 
 Window::~Window() {

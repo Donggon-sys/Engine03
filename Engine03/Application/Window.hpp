@@ -23,6 +23,7 @@ private:
     double lastMouseX;
     double lastMouseY;
     bool isInit;
+    bool hasFullScreen = false;
     
     void setCAMetalLayer();
     bool shouldDraw();

@@ -45,5 +45,5 @@ void RenderAdapter::moveRight() {
 }
 
 void RenderAdapter::update(float deltaTime) {
-    pRender->update(1 / 60.0f);
+    pRender->update(deltaTime);
 }
