@@ -58,6 +58,7 @@ void Window::run() {
         if (!hasFullScreen) {
             hasFullScreen = true;
             enterFullScreen();
+            continue;
         }
         glfwGetWindowSize(pWindow, &width, &height);
         
@@ -88,12 +89,6 @@ bool Window::shouldDraw() {
 }
 
 void Window::enterFullScreen() {
-//    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-//    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-//    
-//    glfwSetWindowMonitor(pWindow, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-    
-    sleep(2.4);
     NSWindow *window = glfwGetCocoaWindow(pWindow);
     [window toggleFullScreen:nil];
 }
