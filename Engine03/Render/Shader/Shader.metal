@@ -60,11 +60,11 @@ struct vertexOut {
 
 [[fragment]] float4 fragmentShader1(vertexOut in [[stage_in]],
                                    texture2d<float> texture[[texture(1)]]) {
-//    constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
-//    float4 out = texture.sample(textureSampler, in.texCoord);
-////    out.z = 1.0f;
-//    return out;
-    float4 out = float4(1.4, 1.4, 1.4, 1.0);
+    constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
+    float4 out = texture.sample(textureSampler, in.texCoord);
+//    out.z = 1.0f;
     return out;
+//    float4 out = float4(1.4, 1.4, 1.4, 1.0);
+//    return out;
 }
 

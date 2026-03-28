@@ -295,6 +295,7 @@
 					"metal-cpp",
 					gltf,
 					include,
+					miniaudio,
 				);
 				INFOPLIST_FILE = Engine03/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -332,6 +333,7 @@
 					"metal-cpp",
 					gltf,
 					include,
+					miniaudio,
 				);
 				INFOPLIST_FILE = Engine03/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";

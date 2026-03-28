@@ -1172,6 +1172,10 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             }
             pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
             
+            if (node->mesh->primitives.size() > 0) {
+                pEncoder->setFragmentTexture(node->mesh->primitives.at(0)->material.baseColorTexture->image, 1);
+            }
+            
             for (Primitive *primitive : node->mesh->primitives) {
                 pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
             }
