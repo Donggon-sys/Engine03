@@ -30,14 +30,10 @@ void Window::processInput() {
     if (glfwGetKey(pWindow, GLFW_KEY_D)) {
         pRender->moveRight();
     }
-    
 
-    
     if (!isInit) {
         Center center = getCenterPosition();
-        glfwSetCursorPos(pWindow, center.x, center.y);
-        lastMouseX = center.x;
-        lastMouseY = center.y;
+        setMousePointPosition(center);
         isInit = true;
         return;
     }
@@ -52,33 +48,42 @@ void Window::processInput() {
     lastMouseY = mouseY;
 }
 
+void Window::setMousePointPosition(Center center) {
+    glfwSetCursorPos(pWindow, center.x, center.y);
+    lastMouseX = center.x;
+    lastMouseY = center.y;
+}
+
 Center Window::getCenterPosition() {
-    GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode *videomode = glfwGetVideoMode(primaryMonitor);
-    
+    int windowX, windowY, windowWidth, windowHeight;
     Center center;
-    center.x = videomode->width / 2;
-    center.y = videomode->height / 2;
+    glfwGetWindowPos(pWindow, &windowX, &windowY);
+    glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
+    
+    center.x = windowX + windowWidth / 2;
+    center.y = windowY + windowHeight / 2;
     return center;
 }
 
+void Window::windowReSize(GLFWwindow* window, int xpos, int ypos) {
+    Window *self = static_cast<Window *>(glfwGetWindowUserPointer(window));
+    Center center = self->getCenterPosition();
+    self->setMousePointPosition(center);
+}
+
 void Window::run() {
+    glfwSetWindowUserPointer(pWindow, this);
     glfwMaximizeWindow(pWindow);
+    glfwSetWindowPosCallback(pWindow, windowReSize);
     int width, height;
     lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(pWindow)) {
         glfwPollEvents();
-//        if (!hasFullScreen) {
-//            hasFullScreen = true;
-//            enterFullScreen();
-//            continue;
-//        }
         glfwGetWindowSize(pWindow, &width, &height);
         
         if (shouldDraw()) {
             processInput();
             pRender->changeSize(&width, &height);
-            double currentTime = glfwGetTime();
             pRender->update(static_cast<float>(1 / 60.0f));
             pRender->drawInCAMetalLayer(pLayer);
         }

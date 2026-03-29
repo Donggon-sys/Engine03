@@ -96,10 +96,7 @@ CA::MetalLayer *Application::getMetalLayer() {
 }
 
 void Application::enterFullScreen() {
-    @autoreleasepool {
-        NSWindow *window = glfwGetCocoaWindow(pWindow);
-        [window toggleFullScreen:nil];
-    }
+    glfwMaximizeWindow(pWindow);
 }
 
 }

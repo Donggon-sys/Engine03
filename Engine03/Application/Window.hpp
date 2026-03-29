@@ -29,6 +29,7 @@ private:
     double lastMouseY;
     bool isInit;
     bool hasFullScreen = false;
+    bool isOpenItme = false;
     
     void setCAMetalLayer();
     bool shouldDraw();
@@ -36,6 +37,8 @@ private:
     void enterFullScreen();
     
     Center getCenterPosition();
+    void setMousePointPosition(Center center);
+    static void windowReSize(GLFWwindow* window, int xpos, int ypos);
     
 public:
     void run();

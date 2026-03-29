@@ -12,7 +12,7 @@ Camera::Camera() {
     aspect = 1.60037518;
     zNear = 0.1;
     zFar = 100;
-    sensitivity = 0.00206f;
+    sensitivity = 0.005f;
     halfYaw = 0.0f;
     halfPicth = 0.0f;
     
@@ -30,7 +30,6 @@ void Camera::mouse(float deltaX, float deltaY) {
     simd::quatf q_yaw = simd::quatf(0.0f, std::sin(halfYaw), 0.0f, std::cos(halfYaw));
     simd::quatf q_picth = simd::quatf(std::sin(halfPicth), 0.0f, 0.0f, std::cos(halfPicth));
     
-//    orientation = simd::normalize(orientation * q_picth * q_yaw);
     orientation = simd::normalize(q_yaw * orientation * q_picth);
 }
 
