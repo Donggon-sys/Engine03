@@ -14,8 +14,8 @@
 #include "Render.hpp"
 
 struct Center {
-    uint x;
-    uint y;
+    double x;
+    double y;
 };
 
 class Window {
@@ -24,9 +24,12 @@ private:
     CA::MetalLayer *pLayer;
     MTL::Device *pDevice;
     RenderAdapter *pRender;
+    
     double lastTime;
     double lastMouseX;
     double lastMouseY;
+    double currentMouseX, currentMouseY;
+    int currentWidth, currentHeight;
     bool isInit;
     bool hasFullScreen = false;
     bool isOpenItme = false;
@@ -38,7 +41,6 @@ private:
     
     Center getCenterPosition();
     void setMousePointPosition(Center center);
-    static void windowReSize(GLFWwindow* window, int xpos, int ypos);
     
 public:
     void run();

@@ -14,6 +14,7 @@
 
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
+#include <iostream>
 
 const double maxFrameRate = 1.0 / 60.0;
 
@@ -38,14 +39,16 @@ void Window::processInput() {
         return;
     }
     
-    double mouseX, mouseY;
-    glfwGetCursorPos(pWindow, &mouseX, &mouseY);
+    glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
+    glfwGetWindowPos(pWindow, &currentWidth, &currentHeight);
+    currentMouseX += currentWidth;
+    currentMouseY += currentHeight;
     
-    float delatX = static_cast<float>( mouseX - lastMouseX );
-    float delatY = static_cast<float>( mouseY - lastMouseY );
+    float delatX = static_cast<float>( currentMouseX - lastMouseX );
+    float delatY = static_cast<float>( currentMouseY - lastMouseY );
     pRender->mouse(-delatX, delatY);
-    lastMouseX = mouseX;
-    lastMouseY = mouseY;
+    lastMouseX = currentMouseX;
+    lastMouseY = currentMouseY;
 }
 
 void Window::setMousePointPosition(Center center) {
@@ -55,26 +58,16 @@ void Window::setMousePointPosition(Center center) {
 }
 
 Center Window::getCenterPosition() {
-    int windowX, windowY, windowWidth, windowHeight;
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *videmode = glfwGetVideoMode(monitor);
     Center center;
-    glfwGetWindowPos(pWindow, &windowX, &windowY);
-    glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
-    
-    center.x = windowX + windowWidth / 2;
-    center.y = windowY + windowHeight / 2;
+    center.x = videmode->width / 2.0;
+    center.y = videmode->height / 2.0;
     return center;
 }
 
-void Window::windowReSize(GLFWwindow* window, int xpos, int ypos) {
-    Window *self = static_cast<Window *>(glfwGetWindowUserPointer(window));
-    Center center = self->getCenterPosition();
-    self->setMousePointPosition(center);
-}
-
 void Window::run() {
-    glfwSetWindowUserPointer(pWindow, this);
     glfwMaximizeWindow(pWindow);
-    glfwSetWindowPosCallback(pWindow, windowReSize);
     int width, height;
     lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(pWindow)) {
