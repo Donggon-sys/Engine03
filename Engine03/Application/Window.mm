@@ -31,35 +31,48 @@ void Window::processInput() {
         pRender->moveRight();
     }
     
-    double mouseX, mouseY;
-    glfwGetCursorPos(pWindow, &mouseX, &mouseY);
+
     
     if (!isInit) {
-        lastMouseX = mouseX;
-        lastMouseY = mouseY;
+        Center center = getCenterPosition();
+        glfwSetCursorPos(pWindow, center.x, center.y);
+        lastMouseX = center.x;
+        lastMouseY = center.y;
         isInit = true;
         return;
     }
     
-    float delatX = (float)mouseX - lastMouseX;
-    float delatY = (float)mouseY - lastMouseY;
+    double mouseX, mouseY;
+    glfwGetCursorPos(pWindow, &mouseX, &mouseY);
     
+    float delatX = static_cast<float>( mouseX - lastMouseX );
+    float delatY = static_cast<float>( mouseY - lastMouseY );
+    pRender->mouse(-delatX, delatY);
     lastMouseX = mouseX;
     lastMouseY = mouseY;
+}
+
+Center Window::getCenterPosition() {
+    GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *videomode = glfwGetVideoMode(primaryMonitor);
     
-    pRender->mouse(-delatX, delatY);
+    Center center;
+    center.x = videomode->width / 2;
+    center.y = videomode->height / 2;
+    return center;
 }
 
 void Window::run() {
+    glfwMaximizeWindow(pWindow);
     int width, height;
     lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(pWindow)) {
         glfwPollEvents();
-        if (!hasFullScreen) {
-            hasFullScreen = true;
-            enterFullScreen();
-            continue;
-        }
+//        if (!hasFullScreen) {
+//            hasFullScreen = true;
+//            enterFullScreen();
+//            continue;
+//        }
         glfwGetWindowSize(pWindow, &width, &height);
         
         if (shouldDraw()) {

@@ -12,9 +12,11 @@ Camera::Camera() {
     aspect = 1.60037518;
     zNear = 0.1;
     zFar = 100;
-    sensitivity = 0.005f;
+    sensitivity = 0.00206f;
+    halfYaw = 0.0f;
+    halfPicth = 0.0f;
     
-    position = simd::make_float3(3.0f, 3.0f, 3.0f);
+    position = simd::make_float3(0.0f, 0.0f, 3.0f);
     orientation = simd::quatf(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
@@ -23,33 +25,24 @@ Camera::~Camera() {
 }
 
 void Camera::mouse(float deltaX, float deltaY) {
-    yaw -= deltaX * sensitivity;
-    pitch -= deltaY * sensitivity;
+    halfYaw   = -deltaX * sensitivity * 0.5;
+    halfPicth = -deltaY * sensitivity * 0.5;
+    simd::quatf q_yaw = simd::quatf(0.0f, std::sin(halfYaw), 0.0f, std::cos(halfYaw));
+    simd::quatf q_picth = simd::quatf(std::sin(halfPicth), 0.0f, 0.0f, std::cos(halfPicth));
     
-    // 限制俯仰角，防止万向节锁和翻转
-    const float limit = M_PI_2 - 0.01f;
-    pitch = (pitch > limit) ? limit : (pitch < -limit) ? -limit : pitch;
-    
-    float cy = cosf(yaw * 0.5f), sy = sinf(yaw * 0.5f);
-    float cp = cosf(pitch * 0.5f), sp = sinf(pitch * 0.5f);
-    
-    orientation = simd::normalize(simd::quatf(
-        sp * cy,
-        cp * sy,
-        -sp * sy,
-        cp * cy
-    ));
+//    orientation = simd::normalize(orientation * q_picth * q_yaw);
+    orientation = simd::normalize(q_yaw * orientation * q_picth);
 }
 
 simd::float3 Camera::getFront() {
-    return orientation * simd::make_float3(0.0f, 0.0f, -1.0f);
+    return orientation(simd::float3{0.0f, 0.0f, -1.0f});
 }
 simd::float3 Camera::getUP() {
-    return orientation * simd::make_float3(0.0f, 1.0f, 0.0f);
+    return orientation(simd::float3{0.0f, 1.0f, 0.0f});
 }
 
 simd::float3 Camera::getRight() {
-    return orientation * simd::make_float3(1.0f, 0.0f, 0.0f);
+    return orientation(simd::float3{1.0f, 0.0f, 0.0f});
 }
 
 void Camera::moveLeft() {

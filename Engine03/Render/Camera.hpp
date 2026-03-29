@@ -16,9 +16,8 @@ private:
     float zFar;
     float sensitivity;
     
-    float yaw = 0.0f;
-    float pitch = 0.0f;
-    
+    float halfYaw, halfPicth;
+
     simd::float3 position;
     simd::quatf orientation;
     

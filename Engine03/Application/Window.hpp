@@ -13,6 +13,11 @@
 #include "RenderAdapter.hpp"
 #include "Render.hpp"
 
+struct Center {
+    uint x;
+    uint y;
+};
+
 class Window {
 private:
     GLFWwindow *pWindow;
@@ -29,6 +34,8 @@ private:
     bool shouldDraw();
     void processInput();
     void enterFullScreen();
+    
+    Center getCenterPosition();
     
 public:
     void run();

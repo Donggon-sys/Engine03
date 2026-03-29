@@ -6,6 +6,7 @@
 //
 
 #include "Application.hpp"
+#include "Time.hpp"
 
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
@@ -27,9 +28,14 @@ Application::Application() {
     pMetalLayer = CA::MetalLayer::layer();
     pMetalLayer->setDevice(pDevice);
     pMetalLayer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+    pCommandQueue = pDevice->newCommandQueue();
     
     // window
     glfwInit();
+    
+    // comparment
+    time = std::make_shared<Time>();
+    
 }
 
 Application::~Application() {
@@ -39,37 +45,45 @@ Application::~Application() {
     if (pMetalLayer) {
         pMetalLayer->release();
     }
+    if (pCommandQueue) {
+        pCommandQueue->release();
+    }
     glfwTerminate();
 }
 
 bool Application::initWindow() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     pWindow = glfwCreateWindow(800, 600, "window", NULL, NULL);
+
     
     if (!pWindow) {
         glfwTerminate();
         return false;
     }
-    glfwPollEvents();
-    fullScreen();
-    glfwPollEvents();
+    enterFullScreen();
     setWindowLayer();
     return true;
 }
 
 void Application::setWindowLayer() {
-    NSWindow *window = glfwGetCocoaWindow(pWindow);
-    window.contentView.layer = (__bridge CAMetalLayer *)pMetalLayer;
-    window.contentView.wantsLayer = YES;
+    @autoreleasepool {
+        NSWindow *window = glfwGetCocoaWindow(pWindow);
+        window.contentView.layer = (__bridge CAMetalLayer *)pMetalLayer;
+        window.contentView.wantsLayer = YES;
+    }
 }
 
 void Application::runLoop() {
     if (!initWindow()) {
         return;
     }
-    
+
     while (!glfwWindowShouldClose(pWindow)) {
         glfwPollEvents();
+        if (!hasFullScreen) {
+            hasFullScreen = true;
+            enterFullScreen();
+        }
     }
 }
 
@@ -81,9 +95,11 @@ CA::MetalLayer *Application::getMetalLayer() {
     return pMetalLayer;
 }
 
-void Application::fullScreen() {
-    NSWindow *window = glfwGetCocoaWindow(pWindow);
-    [window toggleFullScreen:nil];
+void Application::enterFullScreen() {
+    @autoreleasepool {
+        NSWindow *window = glfwGetCocoaWindow(pWindow);
+        [window toggleFullScreen:nil];
+    }
 }
 
 }
