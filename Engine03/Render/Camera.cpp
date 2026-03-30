@@ -28,9 +28,10 @@ void Camera::mouse(float deltaX, float deltaY) {
     halfYaw   = -deltaX * sensitivity * 0.5;
     halfPicth = -deltaY * sensitivity * 0.5;
     simd::quatf q_yaw = simd::quatf(0.0f, std::sin(halfYaw), 0.0f, std::cos(halfYaw));
-    simd::quatf q_picth = simd::quatf(std::sin(halfPicth), 0.0f, 0.0f, std::cos(halfPicth));
+    simd::quatf q_pitch = simd::quatf(std::sin(halfPicth), 0.0f, 0.0f, std::cos(halfPicth));
     
-    orientation = simd::normalize(q_yaw * orientation * q_picth);
+    orientation = simd::normalize(q_yaw * orientation * q_pitch);
+//    orientation = simd::normalize(q_pitch * q_yaw * orientation);
 }
 
 simd::float3 Camera::getFront() {
