@@ -46,11 +46,13 @@ simd::float3 Camera::getRight() {
 }
 
 void Camera::moveLeft() {
-    position = position - simd::normalize(simd::cross(getFront(), getUP())) * 0.06f;
+//    position = position - simd::normalize(simd::cross(getFront(), getUP())) * 0.06f;
+    position = position + simd::normalize(simd::cross(getFront(), getUP())) * 0.06f;
 }
 
 void Camera::moveRight() {
-    position = position + simd::normalize(simd::cross(getFront(), getUP())) * 0.06f;
+    position = position - simd::normalize(simd::cross(getFront(), getUP())) * 0.06f;
+    
 }
 
 void Camera::goForward() {

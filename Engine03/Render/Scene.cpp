@@ -46,7 +46,7 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
 //    mod1.loadModel(device, "ground01.glb", device->newCommandQueue(), 1.0f);
 //    
     mtlgltf::Model mod2 = mtlgltf::Model();
-    mod2.loadModel(device, "shiba.glb", device->newCommandQueue(), 1.0f);
+    mod2.loadModel(device, "fish.glb", device->newCommandQueue(), 1.0f);
 //    modelList.push_back(std::move(mod1));
     modelList.push_back(std::move(mod2));
 }

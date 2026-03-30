@@ -45,9 +45,9 @@ void Window::processInput() {
     if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE)) {
         glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
-        float deltaX = static_cast<float>( lastMouseX - currentMouseX );
-        float deltaY = static_cast<float>( currentMouseY - lastMouseY );
-        pRender->mouse(deltaX, deltaY);
+//        float deltaX = static_cast<float>( lastMouseX - currentMouseX );
+//        float deltaY = static_cast<float>( currentMouseY - lastMouseY );
+//        pRender->mouse(deltaX, deltaY);
         lastMouseX = currentMouseX;
         lastMouseY = currentMouseY;
     } else {
