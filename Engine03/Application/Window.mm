@@ -31,23 +31,29 @@ void Window::processInput() {
     if (glfwGetKey(pWindow, GLFW_KEY_D)) {
         pRender->moveRight();
     }
+    
+    
     if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE)) {
         isOpenItme = true;
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     } else {
         isOpenItme = false;
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     }
 
     if (!isInit) {
         Center center = getCenterPosition();
-        lastMouseX = center.x;
-        lastMouseY = center.y;
         setMousePointPosition(center);
+        int windowPOSX, windowPOSY;
+        glfwGetWindowPos(pWindow, &windowPOSX, &windowPOSY);
+        lastMouseX = center.x - windowPOSX;
+        lastMouseY = center.y - windowPOSY;
         isInit = true;
         return;
     }
     
     if (isOpenItme) {
-        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+//        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
         float delatX = static_cast<float>( currentMouseX - lastMouseX );
         float delatY = static_cast<float>( currentMouseY - lastMouseY );
@@ -55,7 +61,7 @@ void Window::processInput() {
         lastMouseX = currentMouseX;
         lastMouseY = currentMouseY;
     } else {
-        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+//        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
         float delatX = static_cast<float>( currentMouseX - lastMouseX );
         float delatY = static_cast<float>( currentMouseY - lastMouseY );
