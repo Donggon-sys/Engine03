@@ -39,8 +39,9 @@ private:
     void processInput();
     void enterFullScreen();
     
-    Center getCenterPosition();
-    void setMousePointPosition(Center center);
+//    Center getCenterPosition();
+//    void getMousePos();
+//    void setMousePointPosition(Center center);
     
 public:
     void run();

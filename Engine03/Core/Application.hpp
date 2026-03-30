@@ -36,7 +36,7 @@ public:
     Application();
     ~Application();
     [[nodiscard]] bool initWindow();
-    [[nodiscard]] bool initMouse() { return true;};
+    void initMouse();
     void setWindowLayer();
     void runLoop();
     MTL::Device *getDevice();

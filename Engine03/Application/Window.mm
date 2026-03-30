@@ -42,18 +42,16 @@ void Window::processInput() {
     }
 
     if (!isInit) {
-        Center center = getCenterPosition();
-        setMousePointPosition(center);
-        int windowPOSX, windowPOSY;
-        glfwGetWindowPos(pWindow, &windowPOSX, &windowPOSY);
-        lastMouseX = center.x - windowPOSX;
-        lastMouseY = center.y - windowPOSY;
+        int windowWidth, windowHeight;
+        glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
+        glfwSetCursorPos(pWindow, static_cast<double>(windowWidth) / 2.0, static_cast<double>(windowHeight) / 2.0);
+        lastMouseX = static_cast<double>(windowWidth) / 2.0;
+        lastMouseY = static_cast<double>(windowHeight) / 2.0;
         isInit = true;
         return;
     }
     
     if (isOpenItme) {
-//        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
         float delatX = static_cast<float>( currentMouseX - lastMouseX );
         float delatY = static_cast<float>( currentMouseY - lastMouseY );
@@ -61,43 +59,18 @@ void Window::processInput() {
         lastMouseX = currentMouseX;
         lastMouseY = currentMouseY;
     } else {
-//        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
         float delatX = static_cast<float>( currentMouseX - lastMouseX );
         float delatY = static_cast<float>( currentMouseY - lastMouseY );
         pRender->mouse(-delatX, delatY);
-        
-        Center center = getCenterPosition();
-        lastMouseX = center.x;
-        lastMouseY = center.y;
-        setMousePointPosition(center);
+        int windowWidth, windowHeight;
+        glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
+        glfwSetCursorPos(pWindow, static_cast<double>(windowWidth) / 2.0, static_cast<double>(windowHeight) / 2.0);
+        lastMouseX = static_cast<double>(windowWidth) / 2.0;
+        lastMouseY = static_cast<double>(windowHeight) / 2.0;
     }
 }
 
-void Window::setMousePointPosition(Center center) {
-    glfwSetCursorPos(pWindow, center.x, center.y);
-    lastMouseX = center.x;
-    lastMouseY = center.y;
-}
-
-Center Window::getCenterPosition() {
-    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode *videmode = glfwGetVideoMode(monitor);
-    Center center;
-    center.x = videmode->width / 2.0;
-    center.y = videmode->height / 2.0;
-    return center;
-//    Center center;
-//    int windowPOSX, windowPOSY;
-//    glfwGetWindowPos(pWindow, &windowPOSX, &windowPOSY);
-//    int width, height;
-//    glfwGetWindowSize(pWindow, &width, &height);
-//    
-//    center.x = static_cast<double>(windowPOSX + width / 2);
-//    center.y = static_cast<double>(windowPOSY + height / 2);
-//    
-//    return center;
-}
 
 void Window::run() {
     glfwMaximizeWindow(pWindow);

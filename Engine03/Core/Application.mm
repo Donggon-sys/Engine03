@@ -22,6 +22,11 @@
 namespace BTflag {
 namespace core {
 
+struct Center {
+    double x;
+    double y;
+};
+
 Application::Application() {
     // backwark
     pDevice = MTL::CreateSystemDefaultDevice();
@@ -49,6 +54,18 @@ Application::~Application() {
         pCommandQueue->release();
     }
     glfwTerminate();
+}
+
+void Application::initMouse() {
+    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    
+    // 把mouse设置到这个monitor的中心
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *videmode = glfwGetVideoMode(monitor);
+    Center center;
+    center.x = static_cast<double>(videmode->width) / 2.0;
+    center.y = static_cast<double>(videmode->height) / 2.0;
+    glfwSetCursorPos(pWindow, center.x, center.y);
 }
 
 bool Application::initWindow() {
@@ -83,6 +100,7 @@ void Application::runLoop() {
         if (!hasFullScreen) {
             hasFullScreen = true;
             enterFullScreen();
+            initMouse();
         }
     }
 }
