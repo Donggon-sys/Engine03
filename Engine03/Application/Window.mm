@@ -19,6 +19,15 @@
 const double maxFrameRate = 1.0 / 60.0;
 
 void Window::processInput() {
+    if (!isInit) {
+        glfwGetWindowSize(pWindow, &lastWidth, &lastHeight);
+        glfwSetCursorPos(pWindow, static_cast<double>(lastWidth) / 2.0, static_cast<double>(lastHeight) / 2.0);
+        lastMouseX = static_cast<double>(lastWidth) / 2.0;
+        lastMouseY = static_cast<double>(lastHeight) / 2.0;
+        isInit = true;
+        return;
+    }
+    
     if (glfwGetKey(pWindow, GLFW_KEY_W)) {
         pRender->goForward();
     }
@@ -34,24 +43,7 @@ void Window::processInput() {
     
     
     if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE)) {
-        isOpenItme = true;
         glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    } else {
-        isOpenItme = false;
-        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-    }
-
-    if (!isInit) {
-        int windowWidth, windowHeight;
-        glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
-        glfwSetCursorPos(pWindow, static_cast<double>(windowWidth) / 2.0, static_cast<double>(windowHeight) / 2.0);
-        lastMouseX = static_cast<double>(windowWidth) / 2.0;
-        lastMouseY = static_cast<double>(windowHeight) / 2.0;
-        isInit = true;
-        return;
-    }
-    
-    if (isOpenItme) {
         glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
         float delatX = static_cast<float>( currentMouseX - lastMouseX );
         float delatY = static_cast<float>( currentMouseY - lastMouseY );
@@ -59,16 +51,30 @@ void Window::processInput() {
         lastMouseX = currentMouseX;
         lastMouseY = currentMouseY;
     } else {
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        
+        // TODO: 先判断window是否改变大小
+        glfwGetWindowSize(pWindow, &currentWidth, &currentHeight);
+        if (currentWidth != lastWidth or currentHeight != lastHeight) {
+            lastWidth = currentWidth;
+            lastHeight = currentHeight;
+            lastMouseX = static_cast<double>(currentWidth) / 2.0;
+            lastMouseY = static_cast<double>(currentHeight) / 2.0;
+            currentMouseX = static_cast<double>(currentWidth) / 2.0;
+            currentMouseY = static_cast<double>(currentHeight) / 2.0;
+            glfwSetCursorPos(pWindow, static_cast<double>(currentWidth) / 2.0, static_cast<double>(currentHeight) / 2.0);
+            return;
+        }
+        
         glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
         float delatX = static_cast<float>( currentMouseX - lastMouseX );
         float delatY = static_cast<float>( currentMouseY - lastMouseY );
         pRender->mouse(-delatX, delatY);
-        int windowWidth, windowHeight;
-        glfwGetWindowSize(pWindow, &windowWidth, &windowHeight);
-        glfwSetCursorPos(pWindow, static_cast<double>(windowWidth) / 2.0, static_cast<double>(windowHeight) / 2.0);
-        lastMouseX = static_cast<double>(windowWidth) / 2.0;
-        lastMouseY = static_cast<double>(windowHeight) / 2.0;
+        glfwSetCursorPos(pWindow, static_cast<double>(currentWidth) / 2.0, static_cast<double>(currentHeight) / 2.0);
+        lastMouseX = static_cast<double>(currentWidth) / 2.0;
+        lastMouseY = static_cast<double>(currentHeight) / 2.0;
     }
+    
 }
 
 

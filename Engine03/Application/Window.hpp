@@ -26,9 +26,13 @@ private:
     RenderAdapter *pRender;
     
     double lastTime;
-    double lastMouseX;
-    double lastMouseY;
+    
+    // mouse
+    double lastMouseX, lastMouseY;
     double currentMouseX, currentMouseY;
+    
+    // window
+    int lastWidth, lastHeight;
     int currentWidth, currentHeight;
     bool isInit;
     bool hasFullScreen = false;
