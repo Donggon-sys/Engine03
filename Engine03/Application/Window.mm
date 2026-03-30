@@ -31,24 +31,41 @@ void Window::processInput() {
     if (glfwGetKey(pWindow, GLFW_KEY_D)) {
         pRender->moveRight();
     }
+    if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE)) {
+        isOpenItme = true;
+    } else {
+        isOpenItme = false;
+    }
 
     if (!isInit) {
         Center center = getCenterPosition();
+        lastMouseX = center.x;
+        lastMouseY = center.y;
         setMousePointPosition(center);
         isInit = true;
         return;
     }
     
-    glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
-    glfwGetWindowPos(pWindow, &currentWidth, &currentHeight);
-    currentMouseX += currentWidth;
-    currentMouseY += currentHeight;
-    
-    float delatX = static_cast<float>( currentMouseX - lastMouseX );
-    float delatY = static_cast<float>( currentMouseY - lastMouseY );
-    pRender->mouse(-delatX, delatY);
-    lastMouseX = currentMouseX;
-    lastMouseY = currentMouseY;
+    if (isOpenItme) {
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
+        float delatX = static_cast<float>( currentMouseX - lastMouseX );
+        float delatY = static_cast<float>( currentMouseY - lastMouseY );
+        pRender->mouse(-delatX, delatY);
+        lastMouseX = currentMouseX;
+        lastMouseY = currentMouseY;
+    } else {
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
+        float delatX = static_cast<float>( currentMouseX - lastMouseX );
+        float delatY = static_cast<float>( currentMouseY - lastMouseY );
+        pRender->mouse(-delatX, delatY);
+        
+        Center center = getCenterPosition();
+        lastMouseX = center.x;
+        lastMouseY = center.y;
+        setMousePointPosition(center);
+    }
 }
 
 void Window::setMousePointPosition(Center center) {
@@ -64,6 +81,16 @@ Center Window::getCenterPosition() {
     center.x = videmode->width / 2.0;
     center.y = videmode->height / 2.0;
     return center;
+//    Center center;
+//    int windowPOSX, windowPOSY;
+//    glfwGetWindowPos(pWindow, &windowPOSX, &windowPOSY);
+//    int width, height;
+//    glfwGetWindowSize(pWindow, &width, &height);
+//    
+//    center.x = static_cast<double>(windowPOSX + width / 2);
+//    center.y = static_cast<double>(windowPOSY + height / 2);
+//    
+//    return center;
 }
 
 void Window::run() {
@@ -107,7 +134,8 @@ void Window::enterFullScreen() {
 Window::Window() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    pWindow = glfwCreateWindow(800, 600, "window", NULL, NULL);
+    pWindow = glfwCreateWindow(960, 600, "window", NULL, NULL);
+//    glfwSetWindowAspectRatio(pWindow, 16, 10);
     
     if (!pWindow) {
         glfwTerminate();
