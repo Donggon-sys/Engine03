@@ -145,10 +145,10 @@ Window::Window() {
 }
 
 Window::~Window() {
+    glfwTerminate();
     pDevice->release();
     pLayer->release();
     delete pRender;
-    glfwTerminate();
 }
 
 void Window::setCAMetalLayer() {
