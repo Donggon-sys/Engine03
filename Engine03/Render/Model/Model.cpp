@@ -547,6 +547,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                     if (primitive.attributes.find("JOINTS_0") != primitive.attributes.end()) {
                         const tinygltf::Accessor &accessor = model.accessors[primitive.attributes.find("JOINTS_0")->second];
                         const tinygltf::BufferView &view = model.bufferViews[accessor.bufferView];
+                        // 确保使用正确的数据指针
                         bufferJoints = &(model.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]);
                         jointComponentType = accessor.componentType;
                         jointBufferStride = accessor.ByteStride(view) ? (accessor.ByteStride(view) / tinygltf::GetComponentSizeInBytes(jointComponentType)) : tinygltf::GetNumComponentsInType(TINYGLTF_TYPE_VEC4);
