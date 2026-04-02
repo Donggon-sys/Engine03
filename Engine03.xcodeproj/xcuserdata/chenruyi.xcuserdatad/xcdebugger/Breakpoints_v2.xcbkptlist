@@ -62,8 +62,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1104"
-            endingLineNumber = "1104"
+            startingLineNumber = "1088"
+            endingLineNumber = "1088"
             landmarkName = "Model::updateAnimation(index, time)"
             landmarkType = "7">
          </BreakpointContent>
@@ -78,8 +78,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1103"
-            endingLineNumber = "1103"
+            startingLineNumber = "1087"
+            endingLineNumber = "1087"
             landmarkName = "Model::updateAnimation(index, time)"
             landmarkType = "7">
          </BreakpointContent>
@@ -222,8 +222,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "614"
-            endingLineNumber = "614"
+            startingLineNumber = "598"
+            endingLineNumber = "598"
             landmarkName = "Model::loadNode(parent, node, nodeIndex, model, loaderInfo, globalscale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -238,8 +238,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1056"
-            endingLineNumber = "1056"
+            startingLineNumber = "1040"
+            endingLineNumber = "1040"
             landmarkName = "Model::updateAnimation(index, time)"
             landmarkType = "7">
          </BreakpointContent>
@@ -254,8 +254,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1188"
-            endingLineNumber = "1188"
+            startingLineNumber = "1173"
+            endingLineNumber = "1173"
             landmarkName = "Model::draw(pEncoder, pipelineState, depthStencilState)"
             landmarkType = "7">
          </BreakpointContent>
@@ -270,8 +270,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "579"
-            endingLineNumber = "579"
+            startingLineNumber = "563"
+            endingLineNumber = "563"
             landmarkName = "Model::loadNode(parent, node, nodeIndex, model, loaderInfo, globalscale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -286,8 +286,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1150"
-            endingLineNumber = "1150"
+            startingLineNumber = "1134"
+            endingLineNumber = "1134"
             landmarkName = "Model::loadModel(device, fileName, queue, scale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -369,6 +369,38 @@
             startingLineNumber = "45"
             endingLineNumber = "45"
             landmarkName = "Window::processInput()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A1E3D622-F0B0-4E6F-8C32-2CE9FAB98C83"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Engine03/Render/Scene.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "51"
+            endingLineNumber = "51"
+            landmarkName = "Scene::createScene(device, library)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C05F679A-E6C5-4645-B60C-A17922891D96"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Engine03/Render/Model/Model.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "939"
+            endingLineNumber = "939"
+            landmarkName = "Model::loadAnimation(model)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

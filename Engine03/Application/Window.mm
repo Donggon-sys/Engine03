@@ -84,7 +84,7 @@ void Window::processInput() {
 
 
 void Window::run() {
-    glfwMaximizeWindow(pWindow);
+//    glfwMaximizeWindow(pWindow);
     int width, height;
     lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(pWindow)) {

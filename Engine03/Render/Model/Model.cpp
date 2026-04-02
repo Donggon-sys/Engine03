@@ -184,8 +184,7 @@ namespace mtlgltf {
             t.columns[3][1] = this->translation[1];
             t.columns[3][2] = this->translation[2];
             
-//            simd::float4x4 r = simd::float4x4(this->rotation);
-            simd::float4x4 r = simd_matrix4x4(this->rotation);
+            simd::float4x4 r = simd::float4x4(this->rotation);
             
             simd::float4x4 s = simd::float4x4(1.0f);
             s.columns[0][0] = this->scale[0];
@@ -197,19 +196,6 @@ namespace mtlgltf {
     }
 
     simd::float4x4 Node::getMatrix() {
-//        if (!useCacheMatrix) {
-//            simd::float4x4 m = localMatrix();
-//            Node *p = parent;
-//            while (p) {
-//                m = p->localMatrix() * m;
-//                p = p->parent;
-//            }
-//            cachedMatrix = m;
-//            useCacheMatrix = true;
-//            return m;
-//        } else {
-//            return cachedMatrix;
-//        }
             if (!useCacheMatrix) {
                 simd::float4x4 local = localMatrix();
                 if (parent) {
@@ -232,10 +218,7 @@ namespace mtlgltf {
                 size_t numJoints = std::min((uint32_t)skin->joints.size(), MAX_NUM_JOINTS);
                 for (size_t i = 0; i < numJoints; i++) {
                     Node *jointNode = skin->joints[i];
-                    simd::float4x4 jointMat = jointNode->getMatrix() * skin->inverseBindMatrices[i];
-                    jointMat = inverseTransform * jointMat;
-//                    simd::float4x4 jointMat = jointNode->getMatrix() * skin->inverseBindMatrices[i];
-//                    jointMat = inverseTransform * jointMat;
+                    simd::float4x4 jointMat = inverseTransform * jointNode->getMatrix() * skin->inverseBindMatrices[i];
                     mesh->jointMatrix[i] = jointMat;
                 }
                 mesh->jointCount = static_cast<uint32_t>(numJoints);
@@ -275,6 +258,7 @@ namespace mtlgltf {
             float p1 = outputs[next + i + V];
             float m1 = delta * outputs[next + i + B];
             pt[i] = ((2.0f * t3 - 3.0f * t2 + 1.0f) * p0) + ((t3 - 2.0f * t2 + t) * m0) + ((-2.0f * t3 + 3.0f * t2) * p1) + ((t3 - t2) * m1);
+//            pt[i] = ((2.f * t3 - 3.f * t2 + 1.f) * p0) + ((t3 - 2.f * t2 + t) * m0) + ((-2.f * t3 + 3.f * t2) * p1) + ((t3 - t2) * m0);
         }
         return pt;
     }
@@ -954,30 +938,30 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                     animation.samplers.push_back(sampler);
                 }
                 
-                // TODO: 动画通道
-                for (tinygltf::AnimationChannel &source : anim.channels) {
-                    AnimationChannel channel{ };
-                    
-                    if (source.target_path == "rotation") {
-                        channel.path = AnimationChannel::PathType::ROTATION;
-                    }
-                    if (source.target_path == "translation") {
-                        channel.path = AnimationChannel::PathType::TRANSLATION;
-                    }
-                    if (source.target_path == "scale") {
-                        channel.path = AnimationChannel::PathType::SCALE;
-                    }
-                    if (source.target_path == "weights") {
-                        std::cout << "不支持权重" << std::endl;
-                    }
-                    channel.samplerIndex = source.sampler;
-                    channel.node = nodeFromIndex(source.target_node);
-                    if (!channel.node) {
-                        continue;
-                    }
-                    
-                    animation.channels.push_back(channel);
+            }
+            // TODO: 动画通道
+            for (tinygltf::AnimationChannel &source : anim.channels) {
+                AnimationChannel channel{ };
+                
+                if (source.target_path == "rotation") {
+                    channel.path = AnimationChannel::PathType::ROTATION;
                 }
+                if (source.target_path == "translation") {
+                    channel.path = AnimationChannel::PathType::TRANSLATION;
+                }
+                if (source.target_path == "scale") {
+                    channel.path = AnimationChannel::PathType::SCALE;
+                }
+                if (source.target_path == "weights") {
+                    std::cout << "不支持权重" << std::endl;
+                }
+                channel.samplerIndex = source.sampler;
+                channel.node = nodeFromIndex(source.target_node);
+                if (!channel.node) {
+                    continue;
+                }
+                
+                animation.channels.push_back(channel);
             }
             animations.push_back(animation);
         }
@@ -1165,6 +1149,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             bool hasSkin = node->skin? true : false;
             pEncoder->setVertexBytes(&hasSkin, sizeof(bool), NS::UInteger(13));
             simd::float4x4 transformMatrix = node->getMatrix();
+//            simd::float4x4 transformMatrix = simd::float4x4(1);
 
             pEncoder->setVertexBytes(&transformMatrix, sizeof(simd::float4x4), NS::UInteger(10));
             if (hasSkin) {
