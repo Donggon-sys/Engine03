@@ -31,13 +31,6 @@ struct vertexOut {
                                    constant bool& hasSkin [[buffer(13)]]) {
     float4 position = transfromMatrix * float4(in.pos, 1.0f);
     
-//    if (hasSkin) {
-//        position = in.weight0.x * (jointMatrices[in.joint0.x]) * position +
-//                   in.weight0.y * (jointMatrices[in.joint0.y]) * position +
-//                   in.weight0.z * (jointMatrices[in.joint0.z]) * position +
-//                   in.weight0.w * (jointMatrices[in.joint0.w]) * position;
-//    }
-    
     if (hasSkin != 0 && jointMatrices != nullptr) {
         float4 skinnedPos = float4(0.0);
         skinnedPos += in.weight0.x * jointMatrices[in.joint0.x] * position;

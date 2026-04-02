@@ -24,6 +24,7 @@ private:
     CA::MetalLayer *pLayer;
     MTL::Device *pDevice;
     RenderAdapter *pRender;
+    double detlaTime;
     
     double lastTime;
     

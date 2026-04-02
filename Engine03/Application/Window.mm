@@ -94,7 +94,7 @@ void Window::run() {
         if (shouldDraw()) {
             processInput();
             pRender->changeSize(&width, &height);
-            pRender->update(static_cast<float>(1 / 60.0f));
+            pRender->update(static_cast<float>(detlaTime));
             pRender->drawInCAMetalLayer(pLayer);
         }
     }
@@ -102,9 +102,9 @@ void Window::run() {
 
 bool Window::shouldDraw() {
     double currentTime = glfwGetTime();
-    double delta = currentTime - lastTime;
+    detlaTime = currentTime - lastTime;
     
-    if (delta >= maxFrameRate) {
+    if (detlaTime >= maxFrameRate) {
         //TODO: 更新lastTime
         lastTime = lastTime + maxFrameRate;
         
