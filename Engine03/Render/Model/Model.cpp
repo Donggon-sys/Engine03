@@ -472,13 +472,15 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             newNode->scale = simd::make_float3((float)v[0], (float)v[1], (float)v[2]);
         }
         if (node.matrix.size() == 16) {
-            const double *m = node.matrix.data();
-            newNode->matrix = simd::float4x4(simd::make_float4((float)m[0], (float)m[1], (float)m[2], (float)m[3]),
-                                             simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
-                                             simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
-                                             simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
+//            const double *m = node.matrix.data();
+//            newNode->matrix = simd::float4x4(simd::make_float4((float)m[0], (float)m[1], (float)m[2], (float)m[3]),
+//                                             simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
+//                                             simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
+//                                             simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
+            memcpy(&newNode->matrix, node.matrix.data(), sizeof(simd::float4x4));
         }
         
+        // 带Children的Node   
         if (node.children.size() > 0) {
             for (size_t i = 0; i < node.children.size(); i++) {
                 loadNode(newNode, model.nodes[node.children[i]], node.children[i], model, loaderInfo, globalscale);
@@ -738,15 +740,8 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 const tinygltf::Accessor &accessor = model.accessors[source.inverseBindMatrices];
                 const tinygltf::BufferView &view = model.bufferViews[accessor.bufferView];
                 const tinygltf::Buffer &buffer = model.buffers[view.buffer];
-                const float *m = reinterpret_cast<const float *>(&buffer.data[accessor.byteOffset + view.byteOffset]);
-                
-                for (size_t i = 0; i < accessor.count; i++) {
-                    newSkin->inverseBindMatrices.push_back(simd::float4x4(simd::make_float4(m[0], m[1], m[2], m[3]),
-                                                                          simd::make_float4(m[4], m[5], m[6], m[7]),
-                                                                          simd::make_float4(m[8], m[9], m[10], m[11]),
-                                                                          simd::make_float4(m[12], m[13], m[14], m[15])));
-                    m = m + 16;
-                }
+                newSkin->inverseBindMatrices.resize(accessor.count);
+                memcpy(newSkin->inverseBindMatrices.data(), &buffer.data[accessor.byteOffset + view.byteOffset], accessor.count * sizeof(simd::float4x4));
             }
             
             if (newSkin->joints.size() > MAX_NUM_JOINTS) {
@@ -929,7 +924,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                         case TINYGLTF_TYPE_VEC3: {
                             const simd::float3 *buf = static_cast<const simd::float3 *>(dataPtr);
                             for (size_t index = 0; index < accessor.count; index++) {
-                                sampler.outputsVec4.push_back(simd::make_float4(buf[index], 1.0f));
+                                sampler.outputsVec4.push_back(simd::make_float4(buf[index], 0.0f));
                                 sampler.outputs.push_back(buf[index][0]);
                                 sampler.outputs.push_back(buf[index][1]);
                                 sampler.outputs.push_back(buf[index][2]);
@@ -971,6 +966,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 }
                 if (source.target_path == "weights") {
                     std::cout << "不支持权重" << std::endl;
+                    continue;
                 }
                 channel.samplerIndex = source.sampler;
                 channel.node = nodeFromIndex(source.target_node);
@@ -1017,7 +1013,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         for (Node *node : linearNodes) {
             if (node->bvh.valid) {
                 dimensions.min = simd::min(dimensions.min, node->bvh.min);
-                dimensions.max = simd::min(dimensions.max, node->bvh.max);
+                dimensions.max = simd::max(dimensions.max, node->bvh.max);
             }
         }
         
