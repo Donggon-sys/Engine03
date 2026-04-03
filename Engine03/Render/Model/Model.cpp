@@ -300,7 +300,7 @@ namespace mtlgltf {
         switch (interpolation) {
             case AnimationSampler::InterpolationType::LINEAR: {
                 float u = std::max(0.0f, time - inputs[index]) / (inputs[index + 1] - inputs[index]);
-                simd::float4 vecU{u, u, u, u};
+                simd::float4 vecU = simd::make_float4(u, u, u, u);
                 node->scale = simd::mix(outputsVec4[index], outputsVec4[index + 1], vecU).xyz;
                 break;
             }
@@ -327,7 +327,7 @@ namespace mtlgltf {
                 break;
             }
             case AnimationSampler::InterpolationType::STEP: {
-                node->rotation = simd::normalize(simd::quatf(outputsVec4[index].x, outputsVec4[index].y, outputsVec4[index].z, outputsVec4[index].w));
+                node->rotation = simd::quatf(outputsVec4[index].x, outputsVec4[index].y, outputsVec4[index].z, outputsVec4[index].w);
                 break;
             }
             case AnimationSampler::InterpolationType::CUBICSPLINE: {
