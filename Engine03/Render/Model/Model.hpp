@@ -159,8 +159,8 @@ struct Animation {
     std::string name;
     std::vector<AnimationSampler> samplers;
     std::vector<AnimationChannel> channels;
-    float start = std::numeric_limits<float>::max();
-    float end = std::numeric_limits<float>::min();
+    float start = 0.0f;
+    float end = 0.0f;
 };
 
 struct Vertex {
@@ -244,6 +244,7 @@ public:
     void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);
     float getAnimationEndTime(uint index) {
         return animations[index].end;
+//        return 3.0f;
     }
     size_t getAnimationSize() {
         return animations.size();

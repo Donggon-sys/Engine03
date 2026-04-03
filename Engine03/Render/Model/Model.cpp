@@ -196,16 +196,28 @@ namespace mtlgltf {
     }
 
     simd::float4x4 Node::getMatrix() {
-            if (!useCacheMatrix) {
-                simd::float4x4 local = localMatrix();
-                if (parent) {
-                    cachedMatrix = parent->getMatrix() * local;  // 父节点强制更新
-                } else {
-                    cachedMatrix = local;
-                }
-                useCacheMatrix = true;
+//            if (!useCacheMatrix) {
+//                simd::float4x4 local = localMatrix();
+//                if (parent) {
+//                    cachedMatrix = parent->getMatrix() * local;  // 父节点强制更新
+//                } else {
+//                    cachedMatrix = local;
+//                }
+//                useCacheMatrix = true;
+//            }
+        if (!useCacheMatrix) {
+            simd::float4x4 m = localMatrix();
+            Node *p = parent;
+            while (p) {
+                m = p->localMatrix() * m;
+                p = p->parent;
             }
+            cachedMatrix = m;
+            useCacheMatrix = true;
+            return m;
+        } else {
             return cachedMatrix;
+        }
     }
 
     void Node::update() {

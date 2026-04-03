@@ -94,7 +94,7 @@ void Window::run() {
         if (shouldDraw()) {
             processInput();
             pRender->changeSize(&width, &height);
-            pRender->update(static_cast<float>(detlaTime));
+            pRender->update(static_cast<float>(1 / 60.0f));
             pRender->drawInCAMetalLayer(pLayer);
         }
     }
