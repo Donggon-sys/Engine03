@@ -383,7 +383,9 @@ namespace mtlgltf {
         pJointsBuffer = other.pJointsBuffer;
         pWeightsBuffer = other.pWeightsBuffer;
         pJointMatrices = other.pJointMatrices;
+        pDevice = other.pDevice;
         
+        other.pDevice = nullptr;
         other.pIndicesBuffer = nullptr;
         other.pPositionBuffer = nullptr;
         other.pNormalBuffer = nullptr;
@@ -417,7 +419,9 @@ namespace mtlgltf {
             pJointsBuffer = other.pJointsBuffer;
             pWeightsBuffer = other.pWeightsBuffer;
             pJointMatrices = other.pJointMatrices;
+            pDevice = other.pDevice;
             
+            other.pDevice = nullptr;
             other.pIndicesBuffer = nullptr;
             other.pPositionBuffer = nullptr;
             other.pNormalBuffer = nullptr;
@@ -1187,4 +1191,84 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         }
     }
 
+void Model::debugDrawSkeleton(MTL::RenderCommandEncoder *pEncoder,
+                              MTL::RenderPipelineState* linePipelineState,
+                              const simd::float4x4& viewProjectionMatrix) {
+    
+    struct LineVertex {
+        simd::float3 pos;
+        simd::float4 color;
+    };
+    
+    for (Skin* skin : skins) {
+        if (!skin || skin->joints.empty()) continue;
+        
+        // 收集关节世界坐标
+        std::vector<simd::float3> positions;
+        positions.reserve(skin->joints.size());
+        
+        for (Node* joint : skin->joints) {
+            if (!joint) {
+                positions.push_back(simd::float3{0,0,0});
+                continue;
+            }
+            simd::float4x4 m = joint->getMatrix();
+            positions.push_back(simd::make_float3(m.columns[3][0], m.columns[3][1], m.columns[3][2]));
+        }
+        
+        // 构建线段
+        std::vector<LineVertex> lines;
+        
+        // 方案 A：连接父子关节（绿色）
+        for (size_t i = 0; i < skin->joints.size(); i++) {
+            Node* joint = skin->joints[i];
+            if (!joint || !joint->parent) continue;
+            
+            // 检查父节点是否也在 joints 列表中
+            auto it = std::find(skin->joints.begin(), skin->joints.end(), joint->parent);
+            if (it == skin->joints.end()) continue;
+            
+            size_t parentIdx = std::distance(skin->joints.begin(), it);
+            
+            lines.push_back({positions[parentIdx], {0, 1, 0, 1}}); // 父-绿
+            lines.push_back({positions[i], {0, 1, 0, 1}});         // 子-绿
+        }
+        
+        // 方案 B：在关节位置画小十字（红色），方便看到孤立关节
+        for (size_t i = 0; i < positions.size(); i++) {
+            simd::float3 p = positions[i];
+            float s = 0.05f; // 十字大小
+            
+            // X轴
+            lines.push_back({p + simd::float3{-s,0,0}, {1,0,0,1}});
+            lines.push_back({p + simd::float3{s,0,0}, {1,0,0,1}});
+            // Y轴
+            lines.push_back({p + simd::float3{0,-s,0}, {1,0,0,1}});
+            lines.push_back({p + simd::float3{0,s,0}, {1,0,0,1}});
+            // Z轴
+            lines.push_back({p + simd::float3{0,0,-s}, {1,0,0,1}});
+            lines.push_back({p + simd::float3{0,0,s}, {1,0,0,1}});
+        }
+        
+        if (lines.empty()) continue;
+        
+        // 创建临时 buffer
+        if (!pDevice) {
+            std::cerr << "pDevice is null!" << std::endl;
+            return;
+        }
+        MTL::Buffer* buf = pDevice->newBuffer(lines.data(),
+                                              lines.size() * sizeof(LineVertex),
+                                              MTL::ResourceStorageModeShared);
+        
+        // 绑定并绘制
+        
+        pEncoder->setRenderPipelineState(linePipelineState);
+        pEncoder->setVertexBuffer(buf, 0, 0);
+        pEncoder->setVertexBytes(&viewProjectionMatrix, sizeof(simd::float4x4), 1);
+        pEncoder->drawPrimitives(MTL::PrimitiveTypeLine, NS::UInteger(0), NS::UInteger(lines.size()));
+        
+        buf->release();
+    }
+}
 }

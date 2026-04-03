@@ -60,10 +60,10 @@ void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
 //        model.renderModel(encoder);
 //    }
     for (mtlgltf::Model &model : modelList) {
-//        encoder->setRenderPipelineState(PSOList.at(MaterialType::SPECIAL));
-//        encoder->setDepthStencilState(depthStencilState);
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(11));
         model.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
+        // debug
+//        model.debugDrawSkeleton(encoder, PSOList.at(MaterialType::DEBUG_SKELETON), viewProjectionMatrix);
     }
 }
 
@@ -178,6 +178,37 @@ void Scene::createPipelineState(MTL::Device *device, MTL::Library *library) {
         fragmentShader->release();
         
         PSOList.insert({MaterialType::SPECIAL, PSO});
+    }
+    // TODO: 创建线框PSO
+    {
+        MTL::Function *vertexLineShader = library->newFunction(NS::String::string("debugLineVert", NS::UTF8StringEncoding));
+        MTL::Function *fragmentLineShader = library->newFunction(NS::String::string("debugLineFrag", NS::UTF8StringEncoding));
+        
+        MTL::RenderPipelineDescriptor *descriptor = MTL::RenderPipelineDescriptor::alloc()->init();
+        descriptor->setLabel(NS::String::string("Skeleton Debug Line Pipeline", NS::UTF8StringEncoding));
+        descriptor->setVertexFunction(vertexLineShader);
+        descriptor->setFragmentFunction(fragmentLineShader);
+        descriptor->colorAttachments()->object(NS::UInteger(0))->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+        
+        // ❌ 删除整个 vertexDescriptor 设置块
+        // 不需要 setVertexDescriptor
+        
+        descriptor->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
+        
+        descriptor->colorAttachments()->object(NS::UInteger(0))->setBlendingEnabled(true);
+        descriptor->colorAttachments()->object(NS::UInteger(0))->setSourceRGBBlendFactor(MTL::BlendFactorSourceAlpha);
+        descriptor->colorAttachments()->object(NS::UInteger(0))->setSourceAlphaBlendFactor(MTL::BlendFactorSourceAlpha);
+        descriptor->colorAttachments()->object(NS::UInteger(0))->setDestinationRGBBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
+        descriptor->colorAttachments()->object(NS::UInteger(0))->setDestinationAlphaBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
+
+        NS::Error *error = nullptr;
+        MTL::RenderPipelineState *linePSO = device->newRenderPipelineState(descriptor, &error);
+        
+        descriptor->release();
+        vertexLineShader->release();
+        fragmentLineShader->release();
+        
+        PSOList.insert({MaterialType::DEBUG_SKELETON, linePSO});
     }
 }
 

@@ -248,6 +248,10 @@ public:
     size_t getAnimationSize() {
         return animations.size();
     }
+    // 在 public 区域添加这一个方法
+    void debugDrawSkeleton(MTL::RenderCommandEncoder *pEncoder,
+                           MTL::RenderPipelineState* linePipelineState,
+                           const simd::float4x4& viewProjectionMatrix);
 };
 }
 

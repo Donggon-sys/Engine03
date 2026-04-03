@@ -18,7 +18,7 @@ class Scene {
 private:
     float currentTime = 0.0f;
     Camera *pCamera;
-    enum MaterialType {DEFAULT, SPECIAL};
+    enum MaterialType {DEFAULT, SPECIAL, DEBUG_SKELETON};
     std::vector<SModel> smodelList;
     std::vector<mtlgltf::Model> modelList;
     simd::float4x4 viewProjectionMatrix;
