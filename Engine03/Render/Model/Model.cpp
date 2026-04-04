@@ -922,23 +922,44 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                     const void *dataPtr = &buffer.data[accessor.byteOffset + view.byteOffset];
                     switch (accessor.type) {
                         case TINYGLTF_TYPE_VEC3: {
-                            const simd::float3 *buf = static_cast<const simd::float3 *>(dataPtr);
-                            for (size_t index = 0; index < accessor.count; index++) {
-                                sampler.outputsVec4.push_back(simd::make_float4(buf[index], 0.0f));
-                                sampler.outputs.push_back(buf[index][0]);
-                                sampler.outputs.push_back(buf[index][1]);
-                                sampler.outputs.push_back(buf[index][2]);
+//                            const simd::float3 *buf = static_cast<const simd::float3 *>(dataPtr);
+//                            for (size_t index = 0; index < accessor.count; index++) {
+//                                sampler.outputsVec4.push_back(simd::make_float4(buf[index], 0.0f));
+//                                sampler.outputs.push_back(buf[index][0]);
+//                                sampler.outputs.push_back(buf[index][1]);
+//                                sampler.outputs.push_back(buf[index][2]);
+//                            }
+//                            break;
+                            const float *buf = static_cast<const float *>(dataPtr);
+                            for (size_t i = 0; i < accessor.count; i++) {
+                                size_t index = i * 3;
+                                simd::float4 outputVec4 = simd::make_float4(buf[index + 0], buf[index + 1], buf[index + 2], 0.0f);
+                                sampler.outputsVec4.push_back(outputVec4);
+                                sampler.outputs.push_back(buf[index + 0]);
+                                sampler.outputs.push_back(buf[index + 1]);
+                                sampler.outputs.push_back(buf[index + 2]);
                             }
                             break;
                         }
                         case TINYGLTF_TYPE_VEC4: {
-                            const simd::float4 *buf = static_cast<const simd::float4 *>(dataPtr);
-                            for (size_t index = 0; index < accessor.count; index++) {
-                                sampler.outputsVec4.push_back(buf[index]);
-                                sampler.outputs.push_back(buf[index][0]);
-                                sampler.outputs.push_back(buf[index][1]);
-                                sampler.outputs.push_back(buf[index][2]);
-                                sampler.outputs.push_back(buf[index][3]);
+//                            const simd::float4 *buf = static_cast<const simd::float4 *>(dataPtr);
+//                            for (size_t index = 0; index < accessor.count; index++) {
+//                                sampler.outputsVec4.push_back(buf[index]);
+//                                sampler.outputs.push_back(buf[index][0]);
+//                                sampler.outputs.push_back(buf[index][1]);
+//                                sampler.outputs.push_back(buf[index][2]);
+//                                sampler.outputs.push_back(buf[index][3]);
+//                            }
+//                            break;
+                            const float *buf = static_cast<const float *>(dataPtr);
+                            for (size_t i = 0; i < accessor.count; i++) {
+                                size_t index = i * 4;
+                                simd::float4 outputVec4 = simd::make_float4(buf[index + 0], buf[index + 1], buf[index + 2], buf[index + 3]);
+                                sampler.outputsVec4.push_back(outputVec4);
+                                sampler.outputs.push_back(buf[index + 0]);
+                                sampler.outputs.push_back(buf[index + 1]);
+                                sampler.outputs.push_back(buf[index + 2]);
+                                sampler.outputs.push_back(buf[index + 3]);
                             }
                             break;
                         }
@@ -947,8 +968,8 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                             break;
                         }
                     }
-                    animation.samplers.push_back(sampler);
                 }
+                animation.samplers.push_back(sampler);
                 
             }
             // TODO: 动画通道
