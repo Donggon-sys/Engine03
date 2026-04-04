@@ -196,15 +196,6 @@ namespace mtlgltf {
     }
 
     simd::float4x4 Node::getMatrix() {
-//            if (!useCacheMatrix) {
-//                simd::float4x4 local = localMatrix();
-//                if (parent) {
-//                    cachedMatrix = parent->getMatrix() * local;  // 父节点强制更新
-//                } else {
-//                    cachedMatrix = local;
-//                }
-//                useCacheMatrix = true;
-//            }
         if (!useCacheMatrix) {
             simd::float4x4 m = localMatrix();
             Node *p = parent;
@@ -472,12 +463,12 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             newNode->scale = simd::make_float3((float)v[0], (float)v[1], (float)v[2]);
         }
         if (node.matrix.size() == 16) {
-//            const double *m = node.matrix.data();
-//            newNode->matrix = simd::float4x4(simd::make_float4((float)m[0], (float)m[1], (float)m[2], (float)m[3]),
-//                                             simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
-//                                             simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
-//                                             simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
-            memcpy(&newNode->matrix, node.matrix.data(), sizeof(simd::float4x4));
+            const double *m = node.matrix.data();
+            newNode->matrix = simd::float4x4(simd::make_float4((float)m[0], (float)m[1], (float)m[2], (float)m[3]),
+                                             simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
+                                             simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
+                                             simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
+//            memcpy(&newNode->matrix, node.matrix.data(), sizeof(simd::float4x4));
         }
         
         // 带Children的Node   
@@ -922,14 +913,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                     const void *dataPtr = &buffer.data[accessor.byteOffset + view.byteOffset];
                     switch (accessor.type) {
                         case TINYGLTF_TYPE_VEC3: {
-//                            const simd::float3 *buf = static_cast<const simd::float3 *>(dataPtr);
-//                            for (size_t index = 0; index < accessor.count; index++) {
-//                                sampler.outputsVec4.push_back(simd::make_float4(buf[index], 0.0f));
-//                                sampler.outputs.push_back(buf[index][0]);
-//                                sampler.outputs.push_back(buf[index][1]);
-//                                sampler.outputs.push_back(buf[index][2]);
-//                            }
-//                            break;
                             const float *buf = static_cast<const float *>(dataPtr);
                             for (size_t i = 0; i < accessor.count; i++) {
                                 size_t index = i * 3;
@@ -942,15 +925,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                             break;
                         }
                         case TINYGLTF_TYPE_VEC4: {
-//                            const simd::float4 *buf = static_cast<const simd::float4 *>(dataPtr);
-//                            for (size_t index = 0; index < accessor.count; index++) {
-//                                sampler.outputsVec4.push_back(buf[index]);
-//                                sampler.outputs.push_back(buf[index][0]);
-//                                sampler.outputs.push_back(buf[index][1]);
-//                                sampler.outputs.push_back(buf[index][2]);
-//                                sampler.outputs.push_back(buf[index][3]);
-//                            }
-//                            break;
                             const float *buf = static_cast<const float *>(dataPtr);
                             for (size_t i = 0; i < accessor.count; i++) {
                                 size_t index = i * 4;
@@ -1183,7 +1157,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             bool hasSkin = node->skin? true : false;
             pEncoder->setVertexBytes(&hasSkin, sizeof(bool), NS::UInteger(13));
             simd::float4x4 transformMatrix = node->getMatrix();
-//            simd::float4x4 transformMatrix = simd::float4x4(1);
 
             pEncoder->setVertexBytes(&transformMatrix, sizeof(simd::float4x4), NS::UInteger(10));
             if (hasSkin) {
