@@ -44,16 +44,10 @@ namespace mtlgltf {
         return BoundingBox(min, max);
     }
 
-    void Texture::updateDescriptor() {
-        
-    }
-
-    void Texture::destroy() {
-        image->release();
-        sampler->release();
-    }
-
     void Texture::fromgltfImage(tinygltf::Image &gltfimage, std::string path, TextureSampler textureSampler, MTL::Device *device, MTL::CommandQueue *queue) {
+        
+        uint32_t width, height;
+        uint32_t mipLevels;
         unsigned char *pixelData = nullptr;
         size_t pixelDataSize = 0;
         bool needDelete = false;
@@ -148,6 +142,11 @@ namespace mtlgltf {
             cmb->commit();
             cmb->waitUntilCompleted();
         }
+    }
+
+    void Texture::destroy() {
+        image->release();
+        sampler->release();
     }
 
     Primitive::Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material &material) :
@@ -1149,6 +1148,27 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         pIndicesBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::ResourceStorageModeShared);
         
         pJointMatrices = pDevice->newBuffer(sizeof(simd::float4x4) * MAX_NUM_JOINTS, MTL::ResourceStorageModeShared);
+        
+        clearup();
+    }
+
+    void Model::clearup() {
+        position.clear();
+        normal.clear();
+        uv0.clear();
+        uv1.clear();
+        joint0.clear();
+        weight0.clear();
+        color.clear();
+        vertexIndices.clear();
+    }
+
+    float Model::getAnimationEndTime(uint index) {
+        return animations[index].end;
+    }
+
+    size_t Model::getAnimationSize() {
+        return animations.size();
     }
 
     void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {

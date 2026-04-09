@@ -35,14 +35,21 @@ struct TextureSampler {
     MTL::SamplerAddressMode addressModeW;
 };
 
+//struct Texture {
+//    MTL::Texture *image;
+//    uint32_t width, height;
+//    uint32_t mipLevels;
+//    uint32_t layerCount;
+//    MTL::PixelFormat pixelFormat;
+//    MTL::SamplerState *sampler;
+//    void updateDescriptor();
+//    void destroy();
+//    void fromgltfImage(tinygltf::Image &gltfimage, std::string path, TextureSampler textureSampler, MTL::Device *device, MTL::CommandQueue *queue);
+//};
 struct Texture {
     MTL::Texture *image;
-    uint32_t width, height;
-    uint32_t mipLevels;
-    uint32_t layerCount;
     MTL::PixelFormat pixelFormat;
     MTL::SamplerState *sampler;
-    void updateDescriptor();
     void destroy();
     void fromgltfImage(tinygltf::Image &gltfimage, std::string path, TextureSampler textureSampler, MTL::Device *device, MTL::CommandQueue *queue);
 };
@@ -217,7 +224,6 @@ private:
     } dimensions;
     
     void loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, LoaderInfo &loaderInfo, float globalscale);
-//    void getNodeProps(const tinygltf::Node &node, const tinygltf::Model &model, size_t &vertexCount, size_t &indexCount);
     void loadSkin(tinygltf::Model &model);
     void drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder);
     void loadTexture(tinygltf::Model &model, MTL::Device *device, MTL::CommandQueue *queue);
@@ -226,6 +232,7 @@ private:
     void loadAnimation(tinygltf::Model &model);
     void calculateBoundBox(Node *node, Node *parent);
     void getSceneDimensions();
+    void clearup();
     Node* fineNode(Node *parent, uint32_t index);
     Node* nodeFromIndex(uint32_t index);
     MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
@@ -242,13 +249,8 @@ public:
     void updateAnimation(uint32_t index, float time);
     void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
     void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);
-    float getAnimationEndTime(uint index) {
-        return animations[index].end;
-//        return 3.0f;
-    }
-    size_t getAnimationSize() {
-        return animations.size();
-    }
+    float getAnimationEndTime(uint index);
+    size_t getAnimationSize();
     // 在 public 区域添加这一个方法
     void debugDrawSkeleton(MTL::RenderCommandEncoder *pEncoder,
                            MTL::RenderPipelineState* linePipelineState,

@@ -84,7 +84,7 @@ void Window::processInput() {
 
 
 void Window::run() {
-//    glfwMaximizeWindow(pWindow);
+    glfwMaximizeWindow(pWindow);
     int width, height;
     lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(pWindow)) {
@@ -94,7 +94,7 @@ void Window::run() {
         if (shouldDraw()) {
             processInput();
             pRender->changeSize(&width, &height);
-            pRender->update(static_cast<float>(1 / 60.0f));
+            pRender->update(static_cast<float>(detlaTime));
             pRender->drawInCAMetalLayer(pLayer);
         }
     }
