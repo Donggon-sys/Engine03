@@ -7,17 +7,13 @@
 
 #include "Application.hpp"
 #include "Time.hpp"
+#include "layer.h"
 
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_COCOA
-#include <GLFW/glfw3native.h>
-
-#include <Metal/Metal.h>
-#include <QuartzCore/CAMetalLayer.h>
 
 namespace BTflag {
 namespace core {
@@ -83,11 +79,7 @@ bool Application::initWindow() {
 }
 
 void Application::setWindowLayer() {
-    @autoreleasepool {
-        NSWindow *window = glfwGetCocoaWindow(pWindow);
-        window.contentView.layer = (__bridge CAMetalLayer *)pMetalLayer;
-        window.contentView.wantsLayer = YES;
-    }
+    setLayer(pWindow, pMetalLayer);
 }
 
 void Application::runLoop() {
