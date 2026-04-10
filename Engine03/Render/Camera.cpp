@@ -10,14 +10,18 @@
 Camera::Camera() {
     fovy = 45.0f * (M_PI / 180.0f);
     aspect = 1.60037518;
-    zNear = 0.1;
+    zNear = 0.3;
     zFar = 450;
     sensitivity = 0.005f;
     halfYaw = 0.0f;
     halfPicth = 0.0f;
     
-    position = simd::make_float3(0.0f, 0.0f, 3.0f);
+    position = simd::make_float3(0.0f, 8.0f, -8.0f);
     orientation = simd::quatf(0.0f, 0.0f, 0.0f, 1.0f);
+    
+    simd::quatf r = simd::quatf(M_PI, simd::make_float3(0.0f, 1.0f, 0.0f));
+    r = r * simd::quatf(-M_PI / 4, simd::make_float3(1.0f, 0.0f, 0.0f));
+    orientation = orientation * r;
 }
 
 Camera::~Camera() {
