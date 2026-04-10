@@ -9,9 +9,9 @@
 #include "../Core/Application.hpp"
 
 int main(int argc, const char * argv[]) {
-//    Window window;
-//    window.run();
-    BTflag::core::Application app;
-    app.runLoop();
+    Window window;
+    window.run();
+//    BTflag::core::Application app;
+//    app.runLoop();
     return 0;
 }

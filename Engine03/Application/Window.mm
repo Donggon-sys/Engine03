@@ -41,44 +41,47 @@ void Window::processInput() {
         pRender->moveRight();
     }
     
-    
-    if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE)) {
-        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
-//        float deltaX = static_cast<float>( lastMouseX - currentMouseX );
-//        float deltaY = static_cast<float>( currentMouseY - lastMouseY );
-//        pRender->mouse(deltaX, deltaY);
-        lastMouseX = currentMouseX;
-        lastMouseY = currentMouseY;
-    } else {
-        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    if (glfwGetWindowAttrib(pWindow, GLFW_HOVERED)) {
         
-        // TODO: 先判断window是否改变大小
-        glfwGetWindowSize(pWindow, &currentWidth, &currentHeight);
-        if (currentWidth != lastWidth or currentHeight != lastHeight) {
-            lastWidth = currentWidth;
-            lastHeight = currentHeight;
+        if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE)) {
+            glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
+            //        float deltaX = static_cast<float>( lastMouseX - currentMouseX );
+            //        float deltaY = static_cast<float>( currentMouseY - lastMouseY );
+            //        pRender->mouse(deltaX, deltaY);
+            lastMouseX = currentMouseX;
+            lastMouseY = currentMouseY;
+        } else {
+            glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            
+            // TODO: 先判断window是否改变大小
+            glfwGetWindowSize(pWindow, &currentWidth, &currentHeight);
+            if (currentWidth != lastWidth or currentHeight != lastHeight) {
+                lastWidth = currentWidth;
+                lastHeight = currentHeight;
+                lastMouseX = static_cast<double>(currentWidth) / 2.0;
+                lastMouseY = static_cast<double>(currentHeight) / 2.0;
+                currentMouseX = static_cast<double>(currentWidth) / 2.0;
+                currentMouseY = static_cast<double>(currentHeight) / 2.0;
+                glfwSetCursorPos(pWindow, static_cast<double>(currentWidth) / 2.0, static_cast<double>(currentHeight) / 2.0);
+                return;
+            }
+            
+            glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
+            float deltaX = static_cast<float>( lastMouseX - currentMouseX );
+            float deltaY = static_cast<float>( currentMouseY - lastMouseY );
+            // TODO: 设置死区
+            if (std::abs(deltaY) <= 0.5) {
+                deltaY = 0;
+            }
+            pRender->mouse(deltaX, deltaY);
+            //        std::cout << "deltaX: " << deltaX << "," << "deltaY: " << deltaY << std::endl;
+            glfwSetCursorPos(pWindow, static_cast<double>(currentWidth) / 2.0, static_cast<double>(currentHeight) / 2.0);
             lastMouseX = static_cast<double>(currentWidth) / 2.0;
             lastMouseY = static_cast<double>(currentHeight) / 2.0;
-            currentMouseX = static_cast<double>(currentWidth) / 2.0;
-            currentMouseY = static_cast<double>(currentHeight) / 2.0;
-            glfwSetCursorPos(pWindow, static_cast<double>(currentWidth) / 2.0, static_cast<double>(currentHeight) / 2.0);
-            return;
         }
-        
-        glfwGetCursorPos(pWindow, &currentMouseX, &currentMouseY);
-        float deltaX = static_cast<float>( lastMouseX - currentMouseX );
-        float deltaY = static_cast<float>( currentMouseY - lastMouseY );
-        // TODO: 设置死区
-        if (std::abs(deltaY) <= 0.5) {
-            deltaY = 0;
-        }
-        pRender->mouse(deltaX, deltaY);
-//        std::cout << "deltaX: " << deltaX << "," << "deltaY: " << deltaY << std::endl;
-        glfwSetCursorPos(pWindow, static_cast<double>(currentWidth) / 2.0, static_cast<double>(currentHeight) / 2.0);
-        lastMouseX = static_cast<double>(currentWidth) / 2.0;
-        lastMouseY = static_cast<double>(currentHeight) / 2.0;
     }
+    
     
 }
 
