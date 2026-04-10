@@ -7,7 +7,7 @@
 
 #include "Application.hpp"
 #include "Time.hpp"
-#include "layer.h"
+#include "extension.h"
 
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
@@ -53,8 +53,6 @@ Application::~Application() {
 }
 
 void Application::initMouse() {
-    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-    
     // 把mouse设置到这个monitor的中心
     GLFWmonitor *monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode *videmode = glfwGetVideoMode(monitor);
@@ -73,7 +71,6 @@ bool Application::initWindow() {
         glfwTerminate();
         return false;
     }
-    enterFullScreen();
     setWindowLayer();
     return true;
 }
@@ -86,14 +83,11 @@ void Application::runLoop() {
     if (!initWindow()) {
         return;
     }
-
+    enterFullScreen();
+    
+    // TODO: 渲染循环♻️
     while (!glfwWindowShouldClose(pWindow)) {
         glfwPollEvents();
-        if (!hasFullScreen) {
-            hasFullScreen = true;
-            enterFullScreen();
-            initMouse();
-        }
     }
 }
 
@@ -107,6 +101,7 @@ CA::MetalLayer *Application::getMetalLayer() {
 
 void Application::enterFullScreen() {
     glfwMaximizeWindow(pWindow);
+//    enterWorkSpace(pWindow);
 }
 
 }

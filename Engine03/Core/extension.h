@@ -1,12 +1,12 @@
 //
-//  layer.h
+//  extension.h
 //  Engine03
 //
 //  Created by Chenruyi on 2026/4/9.
 //
 
-#ifndef layer_h
-#define layer_h
+#ifndef extension_h
+#define extension_h
 
 namespace CA {
 class MetalLayer;
@@ -14,6 +14,7 @@ class MetalLayer;
 struct GLFWwindow;
 
 void setLayer(GLFWwindow *window, CA::MetalLayer *layer);
+void enterWorkSpace(GLFWwindow *window);
 
-#endif /* layer_h */
+#endif /* extension_h */
 

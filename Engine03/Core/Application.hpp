@@ -24,7 +24,7 @@ class Time;
 
 class Application {
 private:
-    bool hasFullScreen = false;
+//    bool hasFullScreen = false;
     GLFWwindow *pWindow = nullptr;
     MTL::Device *pDevice = nullptr;
     CA::MetalLayer *pMetalLayer = nullptr;

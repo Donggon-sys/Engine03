@@ -1,11 +1,11 @@
 //
-//  layer.mm
+//  extension.mm
 //  Engine03
 //
 //  Created by Chenruyi on 2026/4/9.
 //
 
-#include "layer.h"
+#include "extension.h"
 
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
@@ -23,5 +23,12 @@ void setLayer(GLFWwindow *window, CA::MetalLayer *layer) {
         NSWindow *nswindow = glfwGetCocoaWindow(window);
         nswindow.contentView.layer = (__bridge CAMetalLayer *)layer;
         nswindow.contentView.wantsLayer = YES;
+    }
+}
+
+void enterWorkSpace(GLFWwindow *window) {
+    @autoreleasepool {
+        NSWindow *nswindow = glfwGetCocoaWindow(window);
+        [nswindow toggleFullScreen:nil];
     }
 }
