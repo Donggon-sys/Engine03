@@ -35,17 +35,6 @@ struct TextureSampler {
     MTL::SamplerAddressMode addressModeW;
 };
 
-//struct Texture {
-//    MTL::Texture *image;
-//    uint32_t width, height;
-//    uint32_t mipLevels;
-//    uint32_t layerCount;
-//    MTL::PixelFormat pixelFormat;
-//    MTL::SamplerState *sampler;
-//    void updateDescriptor();
-//    void destroy();
-//    void fromgltfImage(tinygltf::Image &gltfimage, std::string path, TextureSampler textureSampler, MTL::Device *device, MTL::CommandQueue *queue);
-//};
 struct Texture {
     MTL::Texture *image;
     MTL::PixelFormat pixelFormat;

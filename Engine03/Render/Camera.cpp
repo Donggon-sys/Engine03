@@ -11,7 +11,7 @@ Camera::Camera() {
     fovy = 45.0f * (M_PI / 180.0f);
     aspect = 1.60037518;
     zNear = 0.3;
-    zFar = 450;
+    zFar = 600;
     sensitivity = 0.005f;
     halfYaw = 0.0f;
     halfPicth = 0.0f;

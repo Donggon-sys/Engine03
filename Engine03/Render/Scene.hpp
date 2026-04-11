@@ -19,8 +19,9 @@ private:
     float currentTime = 0.0f;
     Camera *pCamera;
     enum MaterialType {DEFAULT, SPECIAL, DEBUG_SKELETON};
-    std::vector<SModel> smodelList;
+//    std::vector<SModel> smodelList;
     std::vector<mtlgltf::Model> modelList;
+    mtlgltf::Model skybox;
     simd::float4x4 viewProjectionMatrix;
     MTL::DepthStencilState *depthStencilState;
     std::map<MaterialType, MTL::RenderPipelineState *> PSOList;

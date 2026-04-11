@@ -42,29 +42,26 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     createPipelineState(device, library);
     createDepthStencilState(device);
     
-    mtlgltf::Model mod1 = mtlgltf::Model();
-    mod1.loadModel(device, "skybox.glb", device->newCommandQueue(), 1.0f);
+    skybox.loadModel(device, "skybox.glb", device->newCommandQueue(), 1.0f);
+    
+//    mtlgltf::Model mod1 = mtlgltf::Model();
+//    mod1.loadModel(device, "skybox.glb", device->newCommandQueue(), 1.0f);
+//    modelList.push_back(std::move(mod1));
     
     mtlgltf::Model mod2 = mtlgltf::Model();
     mod2.loadModel(device, "fish.glb", device->newCommandQueue(), 1.0f);
-    modelList.push_back(std::move(mod1));
     modelList.push_back(std::move(mod2));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
     viewProjectionMatrix = pCamera->getViewProjectionMatrix();
-//    for (SModel &model : smodelList) {
-//        encoder->setRenderPipelineState(PSOList.at(MaterialType::DEFAULT));
-//        encoder->setDepthStencilState(depthStencilState);
-//        encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(viewProjectionBufferIndex));
-//        model.renderModel(encoder);
-//    }
     for (mtlgltf::Model &model : modelList) {
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(11));
         model.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
         // debug
 //        model.debugDrawSkeleton(encoder, PSOList.at(MaterialType::DEBUG_SKELETON), viewProjectionMatrix);
     }
+    skybox.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
 }
 
 void Scene::setViewProjectionMatrix(simd::float4x4 matrix) {

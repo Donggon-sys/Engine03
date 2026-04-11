@@ -9,6 +9,11 @@
 #include <simd/simd.h>
 #include <iostream>
 
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <tinygltf/tiny_gltf.h>
+
 namespace mtlgltf {
     BoundingBox::BoundingBox() {
         
@@ -1185,7 +1190,9 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
             
             if (node->mesh->primitives.size() > 0) {
-                pEncoder->setFragmentTexture(node->mesh->primitives.at(0)->material.baseColorTexture->image, 1);
+                if (node->mesh->primitives.at(0)->material.baseColorTexture->image) {
+                    pEncoder->setFragmentTexture(node->mesh->primitives.at(0)->material.baseColorTexture->image, 1);
+                }
             }
             
             for (Primitive *primitive : node->mesh->primitives) {
