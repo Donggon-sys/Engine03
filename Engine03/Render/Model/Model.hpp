@@ -2,18 +2,18 @@
 //  Model.hpp
 //  Engine03
 //
-//  Created by Chenruyi on 2026/2/16.
+//  Created by Chenruyi on 2026/3/31.
 //
 
 #pragma once
-#include <vector>
-#include <limits>
 #include <string>
-#include <simd/simd.h>
+#include <vector>
 #include <Metal/Metal.hpp>
+#include <simd/simd.h>
 #include <tinygltf/tiny_gltf.h>
 
-namespace mtlgltf {
+namespace BTflag {
+namespace Model {
 constexpr uint32_t MAX_NUM_JOINTS = 128;
 
 struct Node;
@@ -174,8 +174,7 @@ struct LoaderInfo {
     size_t vertexPos = 0;
 };
 
-class Model {
-private:
+struct Model {
     std::vector<simd::float3> position;
     std::vector<simd::float3> normal;
     std::vector<simd::float2> uv0;
@@ -226,8 +225,6 @@ private:
     Node* nodeFromIndex(uint32_t index);
     MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
     MTL::SamplerAddressMode getWarpMode(int32_t warpMode);
-    
-public:
     Model();
     ~Model();
     Model(const Model &other) = delete;
@@ -240,10 +237,7 @@ public:
     void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);
     float getAnimationEndTime(uint index);
     size_t getAnimationSize();
-    // 在 public 区域添加这一个方法
-    void debugDrawSkeleton(MTL::RenderCommandEncoder *pEncoder,
-                           MTL::RenderPipelineState* linePipelineState,
-                           const simd::float4x4& viewProjectionMatrix);
 };
-}
 
+}
+}

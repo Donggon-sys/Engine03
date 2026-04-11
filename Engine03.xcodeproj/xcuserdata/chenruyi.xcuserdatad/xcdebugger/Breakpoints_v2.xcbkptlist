@@ -7,38 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "3C0BB7C6-5E09-471A-B922-3024D20AF8CA"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Engine03/Render/Scene.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "56"
-            endingLineNumber = "56"
-            landmarkName = "Scene::createScene(device, library)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "5203938B-2F95-4AA4-8975-692C43F3A64B"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Engine03/Render/Scene.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "22"
-            endingLineNumber = "22"
-            landmarkName = "unknown"
-            landmarkType = "0">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "1B34E920-D5A5-4AE1-8715-0FE398F9BCCC"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -97,22 +65,6 @@
             startingLineNumber = "32"
             endingLineNumber = "32"
             landmarkName = "Render::update(deltaTime)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "5C3A2465-FB8A-4FA7-A9D4-4AB79126AFEA"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Engine03/Render/Scene.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "31"
-            endingLineNumber = "31"
-            landmarkName = "Scene::update(deltaTime)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -183,22 +135,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0061A1B4-5DD7-4C9B-B0C6-3651C3D97F4D"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Engine03/Render/Scene.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "75"
-            endingLineNumber = "75"
-            landmarkName = "Scene::renderScene(encoder)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "4098CA03-FC39-4E76-BCF5-CB3DDF6A81AF"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -240,8 +176,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1207"
             endingLineNumber = "1207"
-            landmarkName = "Model::draw(pEncoder, pipelineState, depthStencilState)"
-            landmarkType = "7">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -488,7 +424,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "31CB1A43-21A0-4DC1-905C-41D687C6FC9B"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Engine03/Render/Model/Model.cpp"
@@ -498,36 +434,6 @@
             endingLineNumber = "1202"
             landmarkName = "Model::drawNode(node, pEncoder)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "31CB1A43-21A0-4DC1-905C-41D687C6FC9B - 6ea22a06fba56062"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "mtlgltf::Model::drawNode(mtlgltf::Node*, MTL::RenderCommandEncoder*)"
-                  moduleName = "Engine03"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/chenruyi/work/macOS_APP/Engine03/Engine03/Render/Model/Model.cpp"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "1202"
-                  endingLineNumber = "1202">
-               </Location>
-               <Location
-                  uuid = "31CB1A43-21A0-4DC1-905C-41D687C6FC9B - 6ea22a06fba56062"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "mtlgltf::Model::drawNode(mtlgltf::Node*, MTL::RenderCommandEncoder*)"
-                  moduleName = "Engine03"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/chenruyi/work/macOS_APP/Engine03/Engine03/Render/Model/Model.cpp"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "1202"
-                  endingLineNumber = "1202">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
