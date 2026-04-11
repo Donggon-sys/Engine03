@@ -10,6 +10,7 @@
 #include <vector>
 #include <simd/simd.h>
 #include "Model/Model.hpp"
+#include "newModel/Model.hpp"
 #include "Model.hpp"
 #include "Shader/ShaderType.h"
 #include "Camera.hpp"
@@ -21,6 +22,7 @@ private:
     enum MaterialType {DEFAULT, SPECIAL, DEBUG_SKELETON};
 //    std::vector<SModel> smodelList;
     std::vector<mtlgltf::Model> modelList;
+    BTflag::Model::Model mod;
     mtlgltf::Model skybox;
     simd::float4x4 viewProjectionMatrix;
     MTL::DepthStencilState *depthStencilState;

@@ -81,6 +81,7 @@ struct Material {
 };
 
 struct Primitive {
+    uint32_t indexCount;
     MTL::Buffer *pPositionBuffer = nullptr;
     MTL::Buffer *pNormalBuffer = nullptr;
     MTL::Buffer *pTexCoord0Buffer = nullptr;
@@ -96,7 +97,7 @@ struct Primitive {
     
     BoundingBox bb;
     void setBoundingBox(simd::float3 min, simd::float3 max);
-    Primitive(bool hasIndices, Material &material);
+    Primitive(bool hasIndices, uint32_t indexCount, Material &material);
     void destroy();
 };
 
@@ -105,6 +106,7 @@ struct Mesh {
     BoundingBox bb, aabb;
     simd::float4x4 matrix;
     simd::float4x4 jointMatrix[MAX_NUM_JOINTS] { };
+    MTL::Buffer *pJointMatrices = nullptr;
     uint32_t jointCount { 0 };
     uint32_t index;
     Mesh(simd::float4x4 matrix);
@@ -118,7 +120,7 @@ struct Skin {
     Node *skeletonRoot = nullptr;
     std::vector<Node *> joints;
     std::vector<simd::float4x4> inverseBindMatrices;
-    MTL::Buffer *pJointMatrices = nullptr;
+    
 };
 
 struct Node {
@@ -201,18 +203,11 @@ struct Model {
     void loadAnimation(tinygltf::Model &model);
     void calculateBoundBox(Node *node, Node *parent);
     void getSceneDimensions();
-
     Node* fineNode(Node *parent, uint32_t index);
     Node* nodeFromIndex(uint32_t index);
     MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
     MTL::SamplerAddressMode getWarpMode(int32_t warpMode);
-    Model();
-    ~Model();
-    Model(const Model &other) = delete;
-    Model& operator=(Model &other) = delete;
-    Model(Model &&other);
-    Model& operator=(Model &&other);
-    
+    void destroy(MTL::Device *device);
     void updateAnimation(uint32_t index, float time);
     void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
     void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);

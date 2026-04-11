@@ -150,7 +150,7 @@ void Texture::destroy() {
     sampler->release();
 }
 
-Primitive::Primitive(bool hasIndices, Material &material) : hasIndices(hasIndices), material(material) {
+Primitive::Primitive(bool hasIndices, uint32_t indexCount, Material &material) : hasIndices(hasIndices), indexCount(indexCount), material(material) {
     
 };
 
@@ -176,7 +176,9 @@ Mesh::Mesh(simd::float4x4 matrix) {
 }
 
 Mesh::~Mesh() {
+    pJointMatrices->release();
     for (Primitive *p : primitives) {
+        p->destroy();
         delete p;
     }
 }
@@ -341,12 +343,9 @@ void AnimationSampler::rotate(size_t index, float time, Node *node) {
     }
 }
 
-Model::Model() {
-    
-}
+void Model::destroy(MTL::Device *device) {
+    pDevice = device;
 
-Model::~Model() {
-    
     for (Texture texure : textures) {
         texure.destroy();
     }
@@ -364,42 +363,6 @@ Model::~Model() {
         delete skin;
     }
     skins.resize(0);
-}
-
-Model::Model(Model &&other) {
-    aabb = other.aabb;
-    dimensions = other.dimensions;
-    nodes = std::move(other.nodes);
-    linearNodes = std::move(other.linearNodes);
-    skins = std::move(other.skins);
-    textures = std::move(other.textures);
-    textureSamplers = std::move(other.textureSamplers);
-    materials = std::move(other.materials);
-    animations = std::move(other.animations);
-    extensions = std::move(other.extensions);
-    pDevice = other.pDevice;
-    
-    other.pDevice = nullptr;
-}
-
-Model& Model::operator=(Model &&other) {
-    if (this != &other) {
-        aabb = other.aabb;
-        dimensions = other.dimensions;
-        nodes = std::move(other.nodes);
-        linearNodes = std::move(other.linearNodes);
-        skins = std::move(other.skins);
-        textures = std::move(other.textures);
-        textureSamplers = std::move(other.textureSamplers);
-        materials = std::move(other.materials);
-        animations = std::move(other.animations);
-        extensions = std::move(other.extensions);
-        
-        pDevice = other.pDevice;
-        
-        other.pDevice = nullptr;
-    }
-    return *this;
 }
 
 // 下面的程序主要是进行node结构体的创建过程，node的index，node的parent，childrens这些
@@ -432,7 +395,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                                          simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
                                          simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
                                          simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
-//            memcpy(&newNode->matrix, node.matrix.data(), sizeof(simd::float4x4));
     }
     
     // 带Children的Node
@@ -656,7 +618,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                             break;
                     }
                 }
-                Primitive *newPrimitive = new Primitive(hasIndices, primitive.material > -1 ? materials[primitive.material] : materials.back());
+                Primitive *newPrimitive = new Primitive(hasIndices, indexCount, primitive.material > -1 ? materials[primitive.material] : materials.back());
                 newPrimitive->pPositionBuffer = pDevice->newBuffer(position.data(), position.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
                 newPrimitive->pNormalBuffer = pDevice->newBuffer(normal.data(), normal.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
                 newPrimitive->pTexCoord0Buffer = pDevice->newBuffer(uv0.data(), uv0.size() * sizeof(simd::float2), MTL::ResourceStorageModeShared);
@@ -682,6 +644,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 newMesh->bb.min = simd::min(newMesh->bb.min, p->bb.min);
                 newMesh->bb.max = simd::min(newMesh->bb.min, p->bb.max);
             }
+            newMesh->pJointMatrices = pDevice->newBuffer(sizeof(simd::float4x4) * MAX_NUM_JOINTS, MTL::ResourceStorageModeShared);
             newNode->mesh = newMesh;
         }
     }
@@ -1032,7 +995,7 @@ Node* Model::nodeFromIndex(uint32_t index) {
 
 void Model::updateAnimation(uint32_t index, float time) {
     if (animations.empty()) {
-//            std::cout << "没有动画! " << std::endl;
+            std::cout << "没有动画! " << std::endl;
         return;
     }
     if (index > static_cast<uint32_t>(animations.size()) - 1) {
@@ -1143,9 +1106,9 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
 
         pEncoder->setVertexBytes(&transformMatrix, sizeof(simd::float4x4), NS::UInteger(10));
         if (hasSkin) {
-            memcpy(pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
+            memcpy(node->mesh->pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
         }
-        pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
+        pEncoder->setVertexBuffer(node->mesh->pJointMatrices, NS::UInteger(0), NS::UInteger(12));
         
         if (node->mesh->primitives.size() > 0) {
             if (node->mesh->primitives.at(0)->material.baseColorTexture->image) {
@@ -1154,7 +1117,15 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         }
         
         for (Primitive *primitive : node->mesh->primitives) {
-            pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
+            pEncoder->setVertexBuffer(primitive->pPositionBuffer, NS::UInteger(0), NS::UInteger(0));
+            pEncoder->setVertexBuffer(primitive->pNormalBuffer, NS::UInteger(0), NS::UInteger(1));
+            pEncoder->setVertexBuffer(primitive->pTexCoord0Buffer, NS::UInteger(0), NS::UInteger(2));
+            pEncoder->setVertexBuffer(primitive->pTexCoord1Buffer, NS::UInteger(0), NS::UInteger(3));
+            pEncoder->setVertexBuffer(primitive->pJointsBuffer, NS::UInteger(0), NS::UInteger(4));
+            pEncoder->setVertexBuffer(primitive->pWeightsBuffer, NS::UInteger(0), NS::UInteger(5));
+            pEncoder->setVertexBuffer(primitive->pColorBuffer, NS::UInteger(0), NS::UInteger(6));
+            
+            pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, primitive->pIndicesBuffer, 0, 1);
         }
     }
     for (auto child : node->children) {
