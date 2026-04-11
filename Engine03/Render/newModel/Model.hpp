@@ -40,6 +40,7 @@ struct Texture {
     MTL::PixelFormat pixelFormat;
     MTL::SamplerState *sampler;
     void destroy();
+//    ~Texture();
     void fromgltfImage(tinygltf::Image &gltfimage, std::string path, TextureSampler textureSampler, MTL::Device *device, MTL::CommandQueue *queue);
 };
 
@@ -98,7 +99,7 @@ struct Primitive {
     BoundingBox bb;
     void setBoundingBox(simd::float3 min, simd::float3 max);
     Primitive(bool hasIndices, uint32_t indexCount, Material &material);
-    void destroy();
+    ~Primitive();
 };
 
 struct Mesh {
@@ -207,7 +208,7 @@ struct Model {
     Node* nodeFromIndex(uint32_t index);
     MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
     MTL::SamplerAddressMode getWarpMode(int32_t warpMode);
-    void destroy(MTL::Device *device);
+    ~Model();
     void updateAnimation(uint32_t index, float time);
     void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
     void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);

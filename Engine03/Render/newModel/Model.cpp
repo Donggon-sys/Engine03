@@ -160,7 +160,7 @@ void Primitive::setBoundingBox(simd::float3 min, simd::float3 max) {
     bb.valid = true;
 }
 
-void Primitive::destroy() {
+Primitive::~Primitive() {
     pIndicesBuffer->release();
     pPositionBuffer->release();
     pNormalBuffer->release();
@@ -178,7 +178,6 @@ Mesh::Mesh(simd::float4x4 matrix) {
 Mesh::~Mesh() {
     pJointMatrices->release();
     for (Primitive *p : primitives) {
-        p->destroy();
         delete p;
     }
 }
@@ -343,11 +342,10 @@ void AnimationSampler::rotate(size_t index, float time, Node *node) {
     }
 }
 
-void Model::destroy(MTL::Device *device) {
-    pDevice = device;
-
-    for (Texture texure : textures) {
-        texure.destroy();
+Model::~Model() {
+    
+    for (Texture &tex : textures) {
+        tex.destroy();
     }
     textures.resize(0);
     textureSamplers.resize(0);
