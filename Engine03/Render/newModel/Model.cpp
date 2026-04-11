@@ -1142,5 +1142,44 @@ void Model::draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* 
         drawNode(node, pEncoder);
     }
 }
+
+Model::Model(Model &&other) {
+    aabb = other.aabb;
+    dimensions = other.dimensions;
+    nodes = std::move(other.nodes);
+    linearNodes = std::move(other.linearNodes);
+    skins = std::move(other.skins);
+    textures = std::move(other.textures);
+    textureSamplers = std::move(other.textureSamplers);
+    materials = std::move(other.materials);
+    animations = std::move(other.animations);
+    extensions = std::move(other.extensions);
+    
+
+    pDevice = other.pDevice;
+    
+    other.pDevice = nullptr;
+}
+
+Model& Model::operator=(Model &&other) {
+    if (this != &other) {
+        aabb = other.aabb;
+        dimensions = other.dimensions;
+        nodes = std::move(other.nodes);
+        linearNodes = std::move(other.linearNodes);
+        skins = std::move(other.skins);
+        textures = std::move(other.textures);
+        textureSamplers = std::move(other.textureSamplers);
+        materials = std::move(other.materials);
+        animations = std::move(other.animations);
+        extensions = std::move(other.extensions);
+
+        pDevice = other.pDevice;
+        
+        other.pDevice = nullptr;
+    }
+    return *this;
+}
+
 };
 }

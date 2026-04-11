@@ -208,12 +208,17 @@ struct Model {
     Node* nodeFromIndex(uint32_t index);
     MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
     MTL::SamplerAddressMode getWarpMode(int32_t warpMode);
-    ~Model();
     void updateAnimation(uint32_t index, float time);
     void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
     void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);
     float getAnimationEndTime(uint index);
     size_t getAnimationSize();
+    Model( ) = default;
+    ~Model();
+    Model(const Model &other) = delete;
+    Model& operator=(Model &other) = delete;
+    Model(Model &&other);
+    Model& operator=(Model &&other);
 };
 
 }

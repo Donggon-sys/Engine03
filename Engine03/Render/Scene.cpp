@@ -76,9 +76,8 @@ void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
     for (BTflag::Model::Model &model : modelList1) {
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(11));
         model.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
-        // debug
-//        model.debugDrawSkeleton(encoder, PSOList.at(MaterialType::DEBUG_SKELETON), viewProjectionMatrix);
     }
+    skybox.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
 }
 
 void Scene::setViewProjectionMatrix(simd::float4x4 matrix) {
