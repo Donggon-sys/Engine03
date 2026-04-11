@@ -62,6 +62,10 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     BTflag::Model::Model mod2 = BTflag::Model::Model();
     mod2.loadModel(device, "fish.glb", device->newCommandQueue(), 1.0f);
     modelList1.push_back(std::move(mod2));
+    
+    BTflag::Model::Model mod1 = BTflag::Model::Model();
+    mod1.loadModel(device, "skybox.glb", device->newCommandQueue(), 1.0f);
+    modelList1.push_back(std::move(mod1));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
@@ -77,7 +81,7 @@ void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(11));
         model.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
     }
-    skybox.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
+//    skybox.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
 }
 
 void Scene::setViewProjectionMatrix(simd::float4x4 matrix) {

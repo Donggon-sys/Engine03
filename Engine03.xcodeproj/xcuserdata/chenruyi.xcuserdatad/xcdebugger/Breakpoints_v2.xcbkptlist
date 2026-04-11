@@ -190,8 +190,8 @@
             filePath = "Engine03/Render/Scene.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "71"
-            endingLineNumber = "71"
+            startingLineNumber = "75"
+            endingLineNumber = "75"
             landmarkName = "Scene::renderScene(encoder)"
             landmarkType = "7">
          </BreakpointContent>
@@ -482,6 +482,52 @@
             endingLineNumber = "1192"
             landmarkName = "Model::drawNode(node, pEncoder)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "31CB1A43-21A0-4DC1-905C-41D687C6FC9B"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Engine03/Render/Model/Model.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1202"
+            endingLineNumber = "1202"
+            landmarkName = "Model::drawNode(node, pEncoder)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "31CB1A43-21A0-4DC1-905C-41D687C6FC9B - 6ea22a06fba56062"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "mtlgltf::Model::drawNode(mtlgltf::Node*, MTL::RenderCommandEncoder*)"
+                  moduleName = "Engine03"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chenruyi/work/macOS_APP/Engine03/Engine03/Render/Model/Model.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1202"
+                  endingLineNumber = "1202">
+               </Location>
+               <Location
+                  uuid = "31CB1A43-21A0-4DC1-905C-41D687C6FC9B - 6ea22a06fba56062"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "mtlgltf::Model::drawNode(mtlgltf::Node*, MTL::RenderCommandEncoder*)"
+                  moduleName = "Engine03"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chenruyi/work/macOS_APP/Engine03/Engine03/Render/Model/Model.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1202"
+                  endingLineNumber = "1202">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

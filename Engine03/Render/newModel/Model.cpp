@@ -150,9 +150,10 @@ void Texture::destroy() {
     sampler->release();
 }
 
-Primitive::Primitive(bool hasIndices, uint32_t indexCount, Material &material) : hasIndices(hasIndices), indexCount(indexCount), material(material) {
-    
-};
+Primitive::Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material &material) :
+    firstIndex(firstIndex), indexCount(indexCount), vertexCount(vertexCount), material(material) {
+    hasIndices = indexCount > 0;
+}
 
 void Primitive::setBoundingBox(simd::float3 min, simd::float3 max) {
     bb.min = min;
@@ -160,23 +161,11 @@ void Primitive::setBoundingBox(simd::float3 min, simd::float3 max) {
     bb.valid = true;
 }
 
-Primitive::~Primitive() {
-    pIndicesBuffer->release();
-    pPositionBuffer->release();
-    pNormalBuffer->release();
-    pTexCoord0Buffer->release();
-    pTexCoord1Buffer->release();
-    pColorBuffer->release();
-    pJointsBuffer->release();
-    pWeightsBuffer->release();
-}
-
 Mesh::Mesh(simd::float4x4 matrix) {
     this->matrix = matrix;
 }
 
 Mesh::~Mesh() {
-    pJointMatrices->release();
     for (Primitive *p : primitives) {
         delete p;
     }
@@ -342,14 +331,24 @@ void AnimationSampler::rotate(size_t index, float time, Node *node) {
     }
 }
 
-Model::~Model() {
+Model::Model() {
     
-    for (Texture &tex : textures) {
-        tex.destroy();
+}
+
+Model::~Model() {
+    pIndicesBuffer->release();
+    pPositionBuffer->release();
+    pNormalBuffer->release();
+    pTexCoord0Buffer->release();
+    pTexCoord1Buffer->release();
+    pColorBuffer->release();
+    pJointsBuffer->release();
+    pWeightsBuffer->release();
+    pJointMatrices->release();
+    
+    for (Texture texure : textures) {
+        texure.destroy();
     }
-//    for (Node *node : linearNodes) {
-//        node->destroy();
-//    }
     textures.resize(0);
     textureSamplers.resize(0);
     for (Node *node : nodes) {
@@ -364,6 +363,79 @@ Model::~Model() {
         delete skin;
     }
     skins.resize(0);
+}
+
+Model::Model(Model &&other) {
+    aabb = other.aabb;
+    dimensions = other.dimensions;
+    nodes = std::move(other.nodes);
+    linearNodes = std::move(other.linearNodes);
+    skins = std::move(other.skins);
+    textures = std::move(other.textures);
+    textureSamplers = std::move(other.textureSamplers);
+    materials = std::move(other.materials);
+    animations = std::move(other.animations);
+    extensions = std::move(other.extensions);
+    
+    pIndicesBuffer = other.pIndicesBuffer;
+    pPositionBuffer = other.pPositionBuffer;
+    pNormalBuffer = other.pNormalBuffer;
+    pTexCoord0Buffer = other.pTexCoord0Buffer;
+    pTexCoord1Buffer = other.pTexCoord1Buffer;
+    pColorBuffer = other.pColorBuffer;
+    pJointsBuffer = other.pJointsBuffer;
+    pWeightsBuffer = other.pWeightsBuffer;
+    pJointMatrices = other.pJointMatrices;
+    pDevice = other.pDevice;
+    
+    other.pDevice = nullptr;
+    other.pIndicesBuffer = nullptr;
+    other.pPositionBuffer = nullptr;
+    other.pNormalBuffer = nullptr;
+    other.pTexCoord0Buffer = nullptr;
+    other.pTexCoord1Buffer = nullptr;
+    other.pColorBuffer = nullptr;
+    other.pJointsBuffer = nullptr;
+    other.pWeightsBuffer = nullptr;
+    other.pJointMatrices = nullptr;
+}
+
+Model& Model::operator=(Model &&other) {
+    if (this != &other) {
+        aabb = other.aabb;
+        dimensions = other.dimensions;
+        nodes = std::move(other.nodes);
+        linearNodes = std::move(other.linearNodes);
+        skins = std::move(other.skins);
+        textures = std::move(other.textures);
+        textureSamplers = std::move(other.textureSamplers);
+        materials = std::move(other.materials);
+        animations = std::move(other.animations);
+        extensions = std::move(other.extensions);
+        
+        pIndicesBuffer = other.pIndicesBuffer;
+        pPositionBuffer = other.pPositionBuffer;
+        pNormalBuffer = other.pNormalBuffer;
+        pTexCoord0Buffer = other.pTexCoord0Buffer;
+        pTexCoord1Buffer = other.pTexCoord1Buffer;
+        pColorBuffer = other.pColorBuffer;
+        pJointsBuffer = other.pJointsBuffer;
+        pWeightsBuffer = other.pWeightsBuffer;
+        pJointMatrices = other.pJointMatrices;
+        pDevice = other.pDevice;
+        
+        other.pDevice = nullptr;
+        other.pIndicesBuffer = nullptr;
+        other.pPositionBuffer = nullptr;
+        other.pNormalBuffer = nullptr;
+        other.pTexCoord0Buffer = nullptr;
+        other.pTexCoord1Buffer = nullptr;
+        other.pColorBuffer = nullptr;
+        other.pJointsBuffer = nullptr;
+        other.pWeightsBuffer = nullptr;
+        other.pJointMatrices = nullptr;
+    }
+    return *this;
 }
 
 // 下面的程序主要是进行node结构体的创建过程，node的index，node的parent，childrens这些
@@ -396,6 +468,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                                          simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
                                          simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
                                          simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
+//            memcpy(&newNode->matrix, node.matrix.data(), sizeof(simd::float4x4));
     }
     
     // 带Children的Node
@@ -409,15 +482,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
         const tinygltf::Mesh mesh = model.meshes[node.mesh];
         Mesh *newMesh = new Mesh(newNode->matrix);
         for (size_t j = 0; j < mesh.primitives.size(); j++) {
-            std::vector<simd::float3> position;
-            std::vector<simd::float3> normal;
-            std::vector<simd::float2> uv0;
-            std::vector<simd::float2> uv1;
-            std::vector<simd::uint4> joint0;
-            std::vector<simd::float4> weight0;
-            std::vector<simd::float4> color;
-            std::vector<unsigned int> vertexIndices;
-            
             const tinygltf::Primitive &primitive = mesh.primitives[j];
             uint32_t vertexStart = static_cast<uint>(loaderInfo.vertexPos);
             uint32_t indexStart = static_cast<uint>(loaderInfo.indexPos);
@@ -509,35 +573,35 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 for (size_t v = 0; v < posAccessor.count; v++) {
                     {
                         const float *pos = &bufferPos[v * posBufferStride];
-                        position.push_back(simd::make_float3(pos[0], pos[1], pos[2]));
+                        this->position.push_back(simd::make_float3(pos[0], pos[1], pos[2]));
                     }
                     
                     if (bufferNormals) {
                         const float *pNormal = &bufferNormals[v * normBufferStride];
-                        normal.push_back(simd::make_float3(pNormal[0], pNormal[1], pNormal[2]));
+                        this->normal.push_back(simd::make_float3(pNormal[0], pNormal[1], pNormal[2]));
                     } else {
-                        normal.push_back(simd::make_float3(0.0f, 0.0f, 0.0f));
+                        this->normal.push_back(simd::make_float3(0.0f, 0.0f, 0.0f));
                     }
                     
                     if (bufferTexCoordSet0) {
-                        const float *fuv0 = &bufferTexCoordSet0[v * uv0BufferStride];
-                        uv0.push_back(simd::make_float2(fuv0[0], fuv0[1]));
+                        const float *uv0 = &bufferTexCoordSet0[v * uv0BufferStride];
+                        this->uv0.push_back(simd::make_float2(uv0[0], uv0[1]));
                     } else {
-                        uv0.push_back(simd::make_float2(0.0f, 0.0f));
+                        this->uv0.push_back(simd::make_float2(0.0f, 0.0f));
                     }
                     
                     if (bufferTexCoordSet1) {
-                        const float *fuv1 = &bufferTexCoordSet1[v * uv1BufferStride];
-                        uv1.push_back(simd::make_float2(fuv1[0], fuv1[1]));
+                        const float *uv1 = &bufferTexCoordSet1[v * uv1BufferStride];
+                        this->uv1.push_back(simd::make_float2(uv1[0], uv1[1]));
                     } else {
-                        uv1.push_back(simd::make_float2(0.0f, 0.0f));
+                        this->uv1.push_back(simd::make_float2(0.0f, 0.0f));
                     }
                     
                     if (bufferColorSet0) {
                         const float *col = &bufferColorSet0[v * color0BufferStride];
-                        color.push_back(simd::make_float4(col[0], col[1], col[2], col[3]));
+                        this->color.push_back(simd::make_float4(col[0], col[1], col[2], col[3]));
                     } else {
-                        color.push_back(simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f));
+                        this->color.push_back(simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f));
                     }
                     
                     if (hasSkin) {
@@ -546,7 +610,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                                 const uint16_t *buf = static_cast<const uint16_t *>(bufferJoints);
                                 const uint16_t *j = &buf[v * jointBufferStride];
                                 {
-                                    joint0.push_back(simd::make_uint4(j[0], j[1], j[2], j[3]));
+                                    this->joint0.push_back(simd::make_uint4(j[0], j[1], j[2], j[3]));
                                 }
                                 break;
                             }
@@ -554,7 +618,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                                 const uint8_t *buf = static_cast<const uint8_t *>(bufferJoints);
                                 const uint8_t *j = &buf[v * jointBufferStride];
                                 {
-                                    joint0.push_back(simd::make_uint4(j[0], j[1], j[2], j[3]));
+                                    this->joint0.push_back(simd::make_uint4(j[0], j[1], j[2], j[3]));
                                 }
                                 break;
                             }
@@ -562,18 +626,18 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                                 break;
                         }
                     } else {
-                        joint0.push_back(simd::make_uint4(0.0f, 0.0f, 0.0f, 0.0f));
+                        this->joint0.push_back(simd::make_uint4(0.0f, 0.0f, 0.0f, 0.0f));
                     }
                     
                     if (hasSkin) {
                         const float *weight = &bufferWeights[v * weightBufferStride];
-                        weight0.push_back(simd::make_float4(weight[0], weight[1], weight[2], weight[3]));
+                        this->weight0.push_back(simd::make_float4(weight[0], weight[1], weight[2], weight[3]));
                     } else {
-                        weight0.push_back(simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f));
+                        this->weight0.push_back(simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f));
                     }
                     
-                    if (simd::length(weight0.back()) == 0.0f) {
-                        weight0.push_back(simd::make_float4(1.0f, 0.0f, 0.0f, 0.0f));
+                    if (simd::length(this->weight0.back()) == 0.0f) {
+                        this->weight0.push_back(simd::make_float4(1.0f, 0.0f, 0.0f, 0.0f));
                     }
                     loaderInfo.vertexPos++;
                 }
@@ -619,20 +683,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                             break;
                     }
                 }
-                Primitive *newPrimitive = new Primitive(hasIndices, indexCount, primitive.material > -1 ? materials[primitive.material] : materials.back());
-                newPrimitive->pPositionBuffer = pDevice->newBuffer(position.data(), position.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
-                newPrimitive->pNormalBuffer = pDevice->newBuffer(normal.data(), normal.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
-                newPrimitive->pTexCoord0Buffer = pDevice->newBuffer(uv0.data(), uv0.size() * sizeof(simd::float2), MTL::ResourceStorageModeShared);
-                newPrimitive->pTexCoord1Buffer = pDevice->newBuffer(uv1.data(), uv1.size() * sizeof(simd::float2), MTL::ResourceStorageModeShared);
-                newPrimitive->pJointsBuffer = pDevice->newBuffer(joint0.data(), joint0.size() * sizeof(simd::uint4), MTL::ResourceStorageModeShared);
-                newPrimitive->pWeightsBuffer = pDevice->newBuffer(weight0.data(), weight0.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
-                newPrimitive->pColorBuffer = pDevice->newBuffer(color.data(), color.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
-                if (hasIndices) {
-                    newPrimitive->hasIndices = true;
-                    newPrimitive->pIndicesBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::ResourceStorageModeShared);
-                } else {
-                    newPrimitive->hasIndices = false;
-                }
+                Primitive *newPrimitive = new Primitive(indexStart, indexCount, vertexCount, primitive.material > -1 ? materials[primitive.material] : materials.back());
                 newPrimitive->setBoundingBox(posMin, posMax);
                 newMesh->primitives.push_back(newPrimitive);
             }
@@ -645,7 +696,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 newMesh->bb.min = simd::min(newMesh->bb.min, p->bb.min);
                 newMesh->bb.max = simd::min(newMesh->bb.min, p->bb.max);
             }
-            newMesh->pJointMatrices = pDevice->newBuffer(sizeof(simd::float4x4) * MAX_NUM_JOINTS, MTL::ResourceStorageModeShared);
             newNode->mesh = newMesh;
         }
     }
@@ -996,7 +1046,7 @@ Node* Model::nodeFromIndex(uint32_t index) {
 
 void Model::updateAnimation(uint32_t index, float time) {
     if (animations.empty()) {
-            std::cout << "没有动画! " << std::endl;
+//            std::cout << "没有动画! " << std::endl;
         return;
     }
     if (index > static_cast<uint32_t>(animations.size()) - 1) {
@@ -1088,6 +1138,30 @@ void Model::loadModel(MTL::Device *device, std::string fileName, MTL::CommandQue
         std::cout << "模型加载失败! " << std::endl;
         return;
     }
+
+    pPositionBuffer = pDevice->newBuffer(position.data(), position.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
+    pNormalBuffer = pDevice->newBuffer(normal.data(), normal.size() * sizeof(simd::float3), MTL::ResourceStorageModeShared);
+    pTexCoord0Buffer = pDevice->newBuffer(uv0.data(), uv0.size() * sizeof(simd::float2), MTL::ResourceStorageModeShared);
+    pTexCoord1Buffer = pDevice->newBuffer(uv1.data(), uv1.size() * sizeof(simd::float2), MTL::ResourceStorageModeShared);
+    pJointsBuffer = pDevice->newBuffer(joint0.data(), joint0.size() * sizeof(simd::uint4), MTL::ResourceStorageModeShared);
+    pWeightsBuffer = pDevice->newBuffer(weight0.data(), weight0.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
+    pColorBuffer = pDevice->newBuffer(color.data(), color.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
+    pIndicesBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::ResourceStorageModeShared);
+    
+    pJointMatrices = pDevice->newBuffer(sizeof(simd::float4x4) * MAX_NUM_JOINTS, MTL::ResourceStorageModeShared);
+    
+    clearup();
+}
+
+void Model::clearup() {
+    position.clear();
+    normal.clear();
+    uv0.clear();
+    uv1.clear();
+    joint0.clear();
+    weight0.clear();
+    color.clear();
+    vertexIndices.clear();
 }
 
 float Model::getAnimationEndTime(uint index) {
@@ -1107,9 +1181,9 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
 
         pEncoder->setVertexBytes(&transformMatrix, sizeof(simd::float4x4), NS::UInteger(10));
         if (hasSkin) {
-            memcpy(node->mesh->pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
+            memcpy(pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
         }
-        pEncoder->setVertexBuffer(node->mesh->pJointMatrices, NS::UInteger(0), NS::UInteger(12));
+        pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
         
         if (node->mesh->primitives.size() > 0) {
             if (node->mesh->primitives.at(0)->material.baseColorTexture->image) {
@@ -1118,15 +1192,7 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         }
         
         for (Primitive *primitive : node->mesh->primitives) {
-            pEncoder->setVertexBuffer(primitive->pPositionBuffer, NS::UInteger(0), NS::UInteger(0));
-            pEncoder->setVertexBuffer(primitive->pNormalBuffer, NS::UInteger(0), NS::UInteger(1));
-            pEncoder->setVertexBuffer(primitive->pTexCoord0Buffer, NS::UInteger(0), NS::UInteger(2));
-            pEncoder->setVertexBuffer(primitive->pTexCoord1Buffer, NS::UInteger(0), NS::UInteger(3));
-            pEncoder->setVertexBuffer(primitive->pJointsBuffer, NS::UInteger(0), NS::UInteger(4));
-            pEncoder->setVertexBuffer(primitive->pWeightsBuffer, NS::UInteger(0), NS::UInteger(5));
-            pEncoder->setVertexBuffer(primitive->pColorBuffer, NS::UInteger(0), NS::UInteger(6));
-            
-            pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, primitive->pIndicesBuffer, 0, 1);
+            pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
         }
     }
     for (auto child : node->children) {
@@ -1135,50 +1201,19 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
 }
 
 void Model::draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState) {
+    pEncoder->setVertexBuffer(pPositionBuffer, NS::UInteger(0), NS::UInteger(0));
+    pEncoder->setVertexBuffer(pNormalBuffer, NS::UInteger(0), NS::UInteger(1));
+    pEncoder->setVertexBuffer(pTexCoord0Buffer, NS::UInteger(0), NS::UInteger(2));
+    pEncoder->setVertexBuffer(pTexCoord1Buffer, NS::UInteger(0), NS::UInteger(3));
+    pEncoder->setVertexBuffer(pJointsBuffer, NS::UInteger(0), NS::UInteger(4));
+    pEncoder->setVertexBuffer(pWeightsBuffer, NS::UInteger(0), NS::UInteger(5));
+    pEncoder->setVertexBuffer(pColorBuffer, NS::UInteger(0), NS::UInteger(6));
     for (auto &node : nodes) {
         // TODO: 绘制每个mesh
         pEncoder->setRenderPipelineState(pipelineState);
         pEncoder->setDepthStencilState(depthStencilState);
         drawNode(node, pEncoder);
     }
-}
-
-Model::Model(Model &&other) {
-    aabb = other.aabb;
-    dimensions = other.dimensions;
-    nodes = std::move(other.nodes);
-    linearNodes = std::move(other.linearNodes);
-    skins = std::move(other.skins);
-    textures = std::move(other.textures);
-    textureSamplers = std::move(other.textureSamplers);
-    materials = std::move(other.materials);
-    animations = std::move(other.animations);
-    extensions = std::move(other.extensions);
-    
-
-    pDevice = other.pDevice;
-    
-    other.pDevice = nullptr;
-}
-
-Model& Model::operator=(Model &&other) {
-    if (this != &other) {
-        aabb = other.aabb;
-        dimensions = other.dimensions;
-        nodes = std::move(other.nodes);
-        linearNodes = std::move(other.linearNodes);
-        skins = std::move(other.skins);
-        textures = std::move(other.textures);
-        textureSamplers = std::move(other.textureSamplers);
-        materials = std::move(other.materials);
-        animations = std::move(other.animations);
-        extensions = std::move(other.extensions);
-
-        pDevice = other.pDevice;
-        
-        other.pDevice = nullptr;
-    }
-    return *this;
 }
 
 };

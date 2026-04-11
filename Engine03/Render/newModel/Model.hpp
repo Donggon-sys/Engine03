@@ -40,7 +40,6 @@ struct Texture {
     MTL::PixelFormat pixelFormat;
     MTL::SamplerState *sampler;
     void destroy();
-//    ~Texture();
     void fromgltfImage(tinygltf::Image &gltfimage, std::string path, TextureSampler textureSampler, MTL::Device *device, MTL::CommandQueue *queue);
 };
 
@@ -66,12 +65,12 @@ struct Material {
         uint8_t occlusion = 0;
         uint8_t emissive = 0;
     } texCoordSets;
-//    struct Extension {
-//        Texture *specularGlossinessTexture = nullptr;
-//        Texture *diffuseTexture = nullptr;
-//        simd::float4 diffuseFactor = simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f);
-//        simd::float3 specularFactor = simd::make_float3(0.0f, 0.0f, 0.0f);
-//    } extension;
+    struct Extension {
+        Texture *specularGlossinessTexture = nullptr;
+        Texture *diffuseTexture = nullptr;
+        simd::float4 diffuseFactor = simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f);
+        simd::float3 specularFactor = simd::make_float3(0.0f, 0.0f, 0.0f);
+    } extension;
     struct PBRWorkflows {
         bool metallicRoughness = true;
         bool specularGlossiness = false;
@@ -82,24 +81,14 @@ struct Material {
 };
 
 struct Primitive {
+    uint32_t firstIndex;
     uint32_t indexCount;
-    MTL::Buffer *pPositionBuffer = nullptr;
-    MTL::Buffer *pNormalBuffer = nullptr;
-    MTL::Buffer *pTexCoord0Buffer = nullptr;
-    MTL::Buffer *pTexCoord1Buffer = nullptr;
-    MTL::Buffer *pJointsBuffer = nullptr;
-    MTL::Buffer *pWeightsBuffer = nullptr;
-    MTL::Buffer *pColorBuffer = nullptr;
-    
+    uint32_t vertexCount;
     Material &material;
-    
     bool hasIndices;
-    MTL::Buffer *pIndicesBuffer = nullptr;
-    
     BoundingBox bb;
+    Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material &material);
     void setBoundingBox(simd::float3 min, simd::float3 max);
-    Primitive(bool hasIndices, uint32_t indexCount, Material &material);
-    ~Primitive();
 };
 
 struct Mesh {
@@ -107,7 +96,6 @@ struct Mesh {
     BoundingBox bb, aabb;
     simd::float4x4 matrix;
     simd::float4x4 jointMatrix[MAX_NUM_JOINTS] { };
-    MTL::Buffer *pJointMatrices = nullptr;
     uint32_t jointCount { 0 };
     uint32_t index;
     Mesh(simd::float4x4 matrix);
@@ -115,13 +103,11 @@ struct Mesh {
     void setBoundingBox(simd::float3 min, simd::float3 max);
 };
 
-// 动画部分
 struct Skin {
     std::string name;
     Node *skeletonRoot = nullptr;
-    std::vector<Node *> joints;
     std::vector<simd::float4x4> inverseBindMatrices;
-    
+    std::vector<Node *> joints;
 };
 
 struct Node {
@@ -173,12 +159,42 @@ struct Animation {
     float end = 0.0f;
 };
 
+struct Vertex {
+    simd::float3 pos;
+    simd::float3 normal;
+    simd::float2 uv0;
+    simd::float2 uv1;
+    simd::uint4 joint0;
+    simd::float4 weight0;
+    simd::float4 color;
+};
+
 struct LoaderInfo {
     size_t indexPos = 0;
     size_t vertexPos = 0;
 };
 
 struct Model {
+    std::vector<simd::float3> position;
+    std::vector<simd::float3> normal;
+    std::vector<simd::float2> uv0;
+    std::vector<simd::float2> uv1;
+    std::vector<simd::uint4> joint0;
+    std::vector<simd::float4> weight0;
+    std::vector<simd::float4> color;
+    std::vector<unsigned int> vertexIndices;
+    
+    MTL::Buffer *pPositionBuffer = nullptr;
+    MTL::Buffer *pNormalBuffer = nullptr;
+    MTL::Buffer *pTexCoord0Buffer = nullptr;
+    MTL::Buffer *pTexCoord1Buffer = nullptr;
+    MTL::Buffer *pJointsBuffer = nullptr;
+    MTL::Buffer *pWeightsBuffer = nullptr;
+    MTL::Buffer *pColorBuffer = nullptr;
+    MTL::Buffer *pIndicesBuffer = nullptr;
+    
+    MTL::Buffer *pJointMatrices = nullptr;
+    
     MTL::Device *pDevice;
     simd::float4x4 aabb;
     std::vector<Node *> nodes;
@@ -204,21 +220,23 @@ struct Model {
     void loadAnimation(tinygltf::Model &model);
     void calculateBoundBox(Node *node, Node *parent);
     void getSceneDimensions();
+    void clearup();
     Node* fineNode(Node *parent, uint32_t index);
     Node* nodeFromIndex(uint32_t index);
     MTL::SamplerMinMagFilter getFilterMode(int32_t filterMode);
     MTL::SamplerAddressMode getWarpMode(int32_t warpMode);
-    void updateAnimation(uint32_t index, float time);
-    void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
-    void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);
-    float getAnimationEndTime(uint index);
-    size_t getAnimationSize();
-    Model( ) = default;
+    Model();
     ~Model();
     Model(const Model &other) = delete;
     Model& operator=(Model &other) = delete;
     Model(Model &&other);
     Model& operator=(Model &&other);
+    
+    void updateAnimation(uint32_t index, float time);
+    void loadModel(MTL::Device *device, std::string fileName, MTL::CommandQueue *queue, float scale);
+    void draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* pipelineState, MTL::DepthStencilState* depthStencilState);
+    float getAnimationEndTime(uint index);
+    size_t getAnimationSize();
 };
 
 }
