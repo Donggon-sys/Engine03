@@ -347,6 +347,9 @@ Model::~Model() {
     for (Texture &tex : textures) {
         tex.destroy();
     }
+//    for (Node *node : linearNodes) {
+//        node->destroy();
+//    }
     textures.resize(0);
     textureSamplers.resize(0);
     for (Node *node : nodes) {

@@ -36,11 +36,13 @@ void Scene::update(float deltaTime) {
 //            model.updateAnimation(0, currentTime);
 //        }
 //    }
-    if (mod.getAnimationSize() > 0) {
-        if (currentTime > mod.getAnimationEndTime(0)) {
-            currentTime -= mod.getAnimationEndTime(0);
+    for (auto &model : modelList1) {
+        if (model.getAnimationSize() > 0) {
+            if (currentTime > model.getAnimationEndTime(0)) {
+                currentTime -= model.getAnimationEndTime(0);
+            }
+            model.updateAnimation(0, currentTime);
         }
-        mod.updateAnimation(0, currentTime);
     }
 }
 
@@ -57,7 +59,9 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
 //    mtlgltf::Model mod2 = mtlgltf::Model();
 //    mod2.loadModel(device, "fish.glb", device->newCommandQueue(), 1.0f);
 //    modelList.push_back(std::move(mod2));
-    mod.loadModel(device, "fish.glb", device->newCommandQueue(), 1.0f);
+    BTflag::Model::Model mod2 = BTflag::Model::Model();
+    mod2.loadModel(device, "fish.glb", device->newCommandQueue(), 1.0f);
+    modelList1.push_back(std::move(mod2));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
@@ -69,8 +73,12 @@ void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
 ////        model.debugDrawSkeleton(encoder, PSOList.at(MaterialType::DEBUG_SKELETON), viewProjectionMatrix);
 //    }
     encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(11));
-    mod.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
-    skybox.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
+    for (BTflag::Model::Model &model : modelList1) {
+        encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(11));
+        model.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
+        // debug
+//        model.debugDrawSkeleton(encoder, PSOList.at(MaterialType::DEBUG_SKELETON), viewProjectionMatrix);
+    }
 }
 
 void Scene::setViewProjectionMatrix(simd::float4x4 matrix) {

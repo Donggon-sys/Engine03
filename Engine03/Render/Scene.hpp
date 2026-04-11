@@ -22,7 +22,7 @@ private:
     enum MaterialType {DEFAULT, SPECIAL, DEBUG_SKELETON};
 //    std::vector<SModel> smodelList;
     std::vector<mtlgltf::Model> modelList;
-    BTflag::Model::Model mod;
+    std::vector<BTflag::Model::Model> modelList1;
     mtlgltf::Model skybox;
     simd::float4x4 viewProjectionMatrix;
     MTL::DepthStencilState *depthStencilState;
