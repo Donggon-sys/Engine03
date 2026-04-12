@@ -23,6 +23,7 @@ struct vertexOut {
     float2 uv0;
     float2 uv1;
     float4 color;
+    float3 normal;
 };
 
 [[vertex]] vertexOut vertexShader1(vertexIn in [[stage_in]],
@@ -32,20 +33,22 @@ struct vertexOut {
                                    
                                    constant bool& hasSkin [[buffer(13)]]) {
     float4 position = transfromMatrix * float4(in.pos, 1.0f);
+    float3 normal = in.normal;
     
     if (hasSkin != 0 && jointMatrices != nullptr) {
-        float4 skinnedPos = float4(0.0);
-        skinnedPos += in.weight0.x * jointMatrices[in.joint0.x] * position;
-        skinnedPos += in.weight0.y * jointMatrices[in.joint0.y] * position;
-        skinnedPos += in.weight0.z * jointMatrices[in.joint0.z] * position;
-        skinnedPos += in.weight0.w * jointMatrices[in.joint0.w] * position;
-        position = skinnedPos;
+        float4x4 skinMatrix =  in.weight0.x * jointMatrices[in.joint0.x]
+                             + in.weight0.y * jointMatrices[in.joint0.y]
+                             + in.weight0.z * jointMatrices[in.joint0.z]
+                             + in.weight0.w * jointMatrices[in.joint0.w];
+        position = skinMatrix * position;
+        normal = normalize((skinMatrix * float4(normal, 0.0f)).xyz);
     }
     
     vertexOut out;
     out.vertexPosition = viewProjectionMatrix * position;
     out.uv0 = in.uv0;
     out.uv1 = in.uv1;
+    out.normal = normal;
     return out;
 }
 
@@ -70,6 +73,17 @@ struct Material {
                                     texture2d<float> normalTexture[[texture(1)]],
                                     sampler normalSampler [[sampler(1)]]) {
 //    constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
-    float4 out = baseColorTexture.sample(baseColorSampler, in.uv0);
-    return out;
+    float4 objectColor = baseColorTexture.sample(baseColorSampler, in.uv0);
+    
+    // 灯光的属性
+    float3 lightColor = float3(1.0f, 1.0f, 1.0f);
+//    float3 lightPos = float3(0.0f, 6.0f, 0.0f);
+    float3 lightDir = normalize(float3(0.0f, 6.0f, 0.0f));
+    
+    float3 normal = float3(normalTexture.sample(normalSampler, in.uv1).xyz * 2.0f - 1.0f);
+    normal = in.normal;
+    float NdotL = max(dot(normal, lightDir), 0.0f);
+    float3 diffuse = objectColor.xyz * lightColor * NdotL;
+    
+    return float4(diffuse, objectColor.w);
 }

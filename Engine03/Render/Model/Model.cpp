@@ -473,7 +473,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                                          simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
                                          simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
                                          simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
-//            memcpy(&newNode->matrix, node.matrix.data(), sizeof(simd::float4x4));
     }
     
     // 带Children的Node
@@ -588,7 +587,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 for (size_t v = 0; v < posAccessor.count; v++) {
                     {
                         const float *pos = &bufferPos[v * posBufferStride];
-                        this->position.push_back(simd::make_float3(pos[0], pos[1], pos[2]));
+                        this->position.push_back(simd::make_float3(pos[0] * globalscale, pos[1] * globalscale, pos[2] * globalscale));
                     }
                     
                     if (bufferNormals) {
