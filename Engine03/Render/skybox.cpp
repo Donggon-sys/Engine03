@@ -634,6 +634,7 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         for (Primitive *primitive : node->mesh->primitives) {
             if (primitive->material.baseColorTexture != NULL) {
                 pEncoder->setFragmentTexture(primitive->material.baseColorTexture->image, 1);
+                pEncoder->setFragmentSamplerState(primitive->material.baseColorTexture->sampler, 1);
             }
             
             pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
