@@ -174,8 +174,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1224"
-            endingLineNumber = "1224"
+            startingLineNumber = "1217"
+            endingLineNumber = "1217"
             landmarkName = "unknown"
             landmarkType = "0">
          </BreakpointContent>
@@ -318,8 +318,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1236"
-            endingLineNumber = "1236"
+            startingLineNumber = "1229"
+            endingLineNumber = "1229"
             landmarkName = "Model::draw(pEncoder, pipelineState, depthStencilState)"
             landmarkType = "7">
          </BreakpointContent>
@@ -401,38 +401,6 @@
             startingLineNumber = "24"
             endingLineNumber = "24"
             landmarkName = "Camera::Camera()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "31CB1A43-21A0-4DC1-905C-41D687C6FC9B"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Engine03/Render/Model/Model.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1219"
-            endingLineNumber = "1219"
-            landmarkName = "Model::drawNode(node, pEncoder)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "897D177F-5B25-42BD-935E-63C4CB366DB8"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Engine03/Render/Model/Model.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1213"
-            endingLineNumber = "1213"
-            landmarkName = "Model::drawNode(node, pEncoder)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

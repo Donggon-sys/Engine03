@@ -1199,13 +1199,6 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
             memcpy(pJointMatrices->contents(), node->mesh->jointMatrix, MAX_NUM_JOINTS * sizeof(simd::float4x4));
         }
         pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
-        
-//        if (node->mesh->primitives.size() > 0) {
-//            if (node->mesh->primitives.at(0)->material.baseColorTexture->image) {
-//                pEncoder->setFragmentTexture(node->mesh->primitives.at(0)->material.baseColorTexture->image, 1);
-//            }
-//        }
-        
         for (Primitive *primitive : node->mesh->primitives) {
             if (primitive->material.baseColorTexture != NULL) {
                 pEncoder->setFragmentTexture(primitive->material.baseColorTexture->image, 1);

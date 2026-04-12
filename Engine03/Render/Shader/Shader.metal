@@ -47,12 +47,24 @@ struct vertexOut {
     return out;
 }
 
+struct Material {
+    float4 baseColorFactor [[id(8)]];
+    float metallicFactor [[id(5)]];
+    float roughnessFactor [[id(6)]];
+    float4 emissiveFactor [[id(9)]];
+    float emissiveStrength  [[id(11)]];
+    
+    texture2d<float> baseColorTex [[id(0)]];
+    texture2d<float> normalTex [[id(1)]];
+    texture2d<float> metallicRoughnessTex [[id(2)]];
+    texture2d<float> occlusionTex [[id(3)]];
+    texture2d<float> emissiveTex [[id(4)]];
+
+};
+
 [[fragment]] float4 fragmentShader1(vertexOut in [[stage_in]],
                                    texture2d<float> texture[[texture(1)]]) {
     constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
     float4 out = texture.sample(textureSampler, in.texCoord);
-//    out.z = 1.0f;
     return out;
-//    float4 out = float4(1.4, 1.4, 1.4, 1.0);
-//    return out;
 }
