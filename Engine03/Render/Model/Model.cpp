@@ -501,6 +501,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
             {
                 const float *bufferPos = nullptr;
                 const float *bufferNormals = nullptr;
+                const float *bufferTangents = nullptr;
                 const float *bufferTexCoordSet0 = nullptr;
                 const float *bufferTexCoordSet1 = nullptr;
                 const float *bufferColorSet0 = nullptr;
@@ -509,6 +510,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 
                 int posBufferStride = 0;
                 int normBufferStride = 0;
+                int tangentBufferStride = 0;
                 int uv0BufferStride = 0;
                 int uv1BufferStride = 0;
                 int color0BufferStride = 0;
@@ -533,6 +535,14 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                     const tinygltf::BufferView &normView = model.bufferViews[normAccessor.bufferView];
                     bufferNormals = reinterpret_cast<const float *>(&(model.buffers[normView.buffer].data[normAccessor.byteOffset + normView.byteOffset]));
                     normBufferStride = normAccessor.ByteStride(normView) ? (normAccessor.ByteStride(normView) / sizeof(float)) : tinygltf::GetNumComponentsInType(TINYGLTF_TYPE_VEC3);
+                }
+                
+                // TODO: 角度
+                if (primitive.attributes.find("TANGENT") != primitive.attributes.end()) {
+                    const tinygltf::Accessor &tangentAccessor = model.accessors[primitive.attributes.find("NORMAL")->second];
+                    const tinygltf::BufferView &tangentView = model.bufferViews[tangentAccessor.bufferView];
+                    bufferTangents = reinterpret_cast<const float *>(&(model.buffers[tangentView.buffer].data[tangentAccessor.byteOffset + tangentView.byteOffset]));
+                    tangentBufferStride = tangentAccessor.ByteStride(tangentView) ? (tangentAccessor.ByteStride(tangentView) / sizeof(float)) : tinygltf::GetNumComponentsInType(TINYGLTF_TYPE_VEC4);
                 }
                 
                 // TODO: uv0，uv1
@@ -1190,13 +1200,20 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         }
         pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
         
-        if (node->mesh->primitives.size() > 0) {
-            if (node->mesh->primitives.at(0)->material.baseColorTexture->image) {
-                pEncoder->setFragmentTexture(node->mesh->primitives.at(0)->material.baseColorTexture->image, 1);
-            }
-        }
+//        if (node->mesh->primitives.size() > 0) {
+//            if (node->mesh->primitives.at(0)->material.baseColorTexture->image) {
+//                pEncoder->setFragmentTexture(node->mesh->primitives.at(0)->material.baseColorTexture->image, 1);
+//            }
+//        }
         
         for (Primitive *primitive : node->mesh->primitives) {
+            if (primitive->material.baseColorTexture != NULL) {
+                pEncoder->setFragmentTexture(primitive->material.baseColorTexture->image, 1);
+            }
+            if (primitive->material.normalTexture != NULL) {
+                pEncoder->setFragmentTexture(primitive->material.normalTexture->image, 2);
+            }
+            
             pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
         }
     }

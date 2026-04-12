@@ -47,7 +47,7 @@ void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {
         encoder->setVertexBytes(&viewProjectionMatrix, sizeof(viewProjectionMatrix), NS::UInteger(11));
         model.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
     }
-    skybox.draw(encoder, PSOList.at(MaterialType::SPECIAL), depthStencilState);
+    skybox.draw(encoder, PSOList.at(MaterialType::SKYBOX), depthStencilState);
 }
 
 void Scene::setViewProjectionMatrix(simd::float4x4 matrix) {
@@ -161,6 +161,49 @@ void Scene::createPipelineState(MTL::Device *device, MTL::Library *library) {
         fragmentShader->release();
         
         PSOList.insert({MaterialType::SPECIAL, PSO});
+    }
+    // TODO: skybox PSO
+    {
+        MTL::Function *vertexShader = library->newFunction(NS::String::string("skyboxVertexShader", NS::UTF8StringEncoding));
+        MTL::Function *fragmentShader = library->newFunction(NS::String::string("skyboxFragmentShader", NS::UTF8StringEncoding));
+        
+        MTL::RenderPipelineDescriptor *descriptor = MTL::RenderPipelineDescriptor::alloc()->init();
+        descriptor->setLabel(NS::String::string("model Rendering Pipeline", NS::UTF8StringEncoding));
+        descriptor->setVertexFunction(vertexShader);
+        descriptor->setFragmentFunction(fragmentShader);
+        descriptor->colorAttachments()->object(NS::UInteger(0))->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+        
+        {
+            MTL::VertexDescriptor *vertexDescriptor = MTL::VertexDescriptor::alloc()->init();
+            vertexDescriptor->attributes()->object(NS::UInteger(0))->setFormat(MTL::VertexFormat::VertexFormatFloat3);
+            vertexDescriptor->attributes()->object(NS::UInteger(0))->setOffset(NS::UInteger(0));
+            vertexDescriptor->attributes()->object(NS::UInteger(0))->setBufferIndex(NS::UInteger(0));
+            vertexDescriptor->layouts()->object(NS::UInteger(0))->setStride(NS::UInteger(sizeof(simd::float3)));
+
+            vertexDescriptor->attributes()->object(NS::UInteger(1))->setFormat(MTL::VertexFormat::VertexFormatFloat3);
+            vertexDescriptor->attributes()->object(NS::UInteger(1))->setOffset(NS::UInteger(0));
+            vertexDescriptor->attributes()->object(NS::UInteger(1))->setBufferIndex(NS::UInteger(1));
+            vertexDescriptor->layouts()->object(NS::UInteger(1))->setStride(NS::UInteger(sizeof(simd::float3)));
+            
+            vertexDescriptor->attributes()->object(NS::UInteger(2))->setFormat(MTL::VertexFormat::VertexFormatFloat2);
+            vertexDescriptor->attributes()->object(NS::UInteger(2))->setOffset(NS::UInteger(0));
+            vertexDescriptor->attributes()->object(NS::UInteger(2))->setBufferIndex(NS::UInteger(2));
+            vertexDescriptor->layouts()->object(NS::UInteger(2))->setStride(NS::UInteger(sizeof(simd::float2)));
+
+            descriptor->setVertexDescriptor(vertexDescriptor);
+            vertexDescriptor->release();
+        }
+        
+        descriptor->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
+
+        NS::Error *error;
+        MTL::RenderPipelineState *PSO = device->newRenderPipelineState(descriptor, &error);
+        
+        descriptor->release();
+        vertexShader->release();
+        fragmentShader->release();
+        
+        PSOList.insert({MaterialType::SKYBOX, PSO});
     }
     // TODO: 创建线框PSO
     {

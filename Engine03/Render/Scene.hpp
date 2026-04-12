@@ -10,7 +10,7 @@
 #include <vector>
 #include <simd/simd.h>
 #include "Model/Model.hpp"
-#include "Model.hpp"
+#include "skybox.hpp"
 #include "Shader/ShaderType.h"
 #include "Camera.hpp"
 
@@ -18,9 +18,9 @@ class Scene {
 private:
     float currentTime = 0.0f;
     Camera *pCamera;
-    enum MaterialType {DEFAULT, SPECIAL, DEBUG_SKELETON};
+    enum MaterialType {DEFAULT, SPECIAL, DEBUG_SKELETON, SKYBOX};
     std::vector<BTflag::Model::Model> modelList1;
-    BTflag::Model::Model skybox;
+    BTflag::Skybox::Model skybox;
     simd::float4x4 viewProjectionMatrix;
     MTL::DepthStencilState *depthStencilState;
     std::map<MaterialType, MTL::RenderPipelineState *> PSOList;

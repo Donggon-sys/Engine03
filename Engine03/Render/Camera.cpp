@@ -16,7 +16,7 @@ Camera::Camera() {
     halfYaw = 0.0f;
     halfPicth = 0.0f;
     
-    position = simd::make_float3(0.0f, 8.0f, -8.0f);
+    position = simd::make_float3(0.0f, 12.0f, -12.0f);
     orientation = simd::quatf(0.0f, 0.0f, 0.0f, 1.0f);
     
     simd::quatf r = simd::quatf(M_PI, simd::make_float3(0.0f, 1.0f, 0.0f));
