@@ -20,7 +20,8 @@ struct vertexIn {
 
 struct vertexOut {
     float4 vertexPosition [[position]];
-    float2 texCoord;
+    float2 uv0;
+    float2 uv1;
     float4 color;
 };
 
@@ -43,7 +44,8 @@ struct vertexOut {
     
     vertexOut out;
     out.vertexPosition = viewProjectionMatrix * position;
-    out.texCoord = in.uv0;
+    out.uv0 = in.uv0;
+    out.uv1 = in.uv1;
     return out;
 }
 
@@ -63,8 +65,9 @@ struct Material {
 };
 
 [[fragment]] float4 fragmentShader1(vertexOut in [[stage_in]],
-                                   texture2d<float> texture[[texture(1)]]) {
+                                   texture2d<float> baseColorTexture[[texture(0)]],
+                                    texture2d<float> normalTexture[[texture(1)]]) {
     constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
-    float4 out = texture.sample(textureSampler, in.texCoord);
+    float4 out = baseColorTexture.sample(textureSampler, in.uv0);
     return out;
 }

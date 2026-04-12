@@ -1201,10 +1201,10 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         pEncoder->setVertexBuffer(pJointMatrices, NS::UInteger(0), NS::UInteger(12));
         for (Primitive *primitive : node->mesh->primitives) {
             if (primitive->material.baseColorTexture != NULL) {
-                pEncoder->setFragmentTexture(primitive->material.baseColorTexture->image, 1);
+                pEncoder->setFragmentTexture(primitive->material.baseColorTexture->image, 0);
             }
             if (primitive->material.normalTexture != NULL) {
-                pEncoder->setFragmentTexture(primitive->material.normalTexture->image, 2);
+                pEncoder->setFragmentTexture(primitive->material.normalTexture->image, 1);
             }
             
             pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);
