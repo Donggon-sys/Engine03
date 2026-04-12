@@ -11,40 +11,6 @@
 namespace BTflag {
 namespace Skybox {
 
-BoundingBox::BoundingBox() {
-    
-}
-
-BoundingBox::BoundingBox(simd::float3 min, simd::float3 max) : min(min), max(max) {
-    
-}
-
-BoundingBox BoundingBox::getAABB(simd::float4x4 m) {
-    simd::float3 min = simd::make_float3(m.columns[3][0], m.columns[3][1], m.columns[3][2]);
-    simd::float3 max = min;
-    simd::float3 v0, v1;
-    
-    simd::float3 right = simd::make_float3(m.columns[0][0], m.columns[0][1], m.columns[0][2]);
-    v0 = right * this->min.x;
-    v1 = right * this->max.x;
-    min += simd::min(v0, v1);
-    max += simd::max(v0, v1);
-    
-    simd::float3 up = simd::make_float3(m.columns[1][0], m.columns[1][1], m.columns[1][2]);
-    v0 = up * this->min.y;
-    v1 = up * this->max.y;
-    min += simd::min(v0, v1);
-    max += simd::max(v0, v1);
-    
-    simd::float3 back = simd::make_float3(m.columns[2][0], m.columns[2][1], m.columns[2][2]);
-    v0 = back * this->min.z;
-    v1 = back * this->max.z;
-    min += simd::min(v0, v1);
-    max += simd::max(v0, v1);
-
-    return BoundingBox(min, max);
-}
-
 void Texture::fromgltfImage(tinygltf::Image &gltfimage, std::string path, TextureSampler textureSampler, MTL::Device *device, MTL::CommandQueue *queue) {
     
     uint32_t width, height;
@@ -155,12 +121,6 @@ Primitive::Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCo
     hasIndices = indexCount > 0;
 }
 
-void Primitive::setBoundingBox(simd::float3 min, simd::float3 max) {
-    bb.min = min;
-    bb.max = max;
-    bb.valid = true;
-}
-
 Mesh::Mesh(simd::float4x4 matrix) {
     this->matrix = matrix;
 }
@@ -169,12 +129,6 @@ Mesh::~Mesh() {
     for (Primitive *p : primitives) {
         delete p;
     }
-}
-
-void Mesh::setBoundingBox(simd::float3 min, simd::float3 max) {
-    bb.min = min;
-    bb.max = max;
-    bb.valid = true;
 }
 
 simd::float4x4 Node::localMatrix() {
@@ -333,7 +287,6 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                                          simd::make_float4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
                                          simd::make_float4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
                                          simd::make_float4((float)m[12], (float)m[13], (float)m[14], (float)m[15]));
-//            memcpy(&newNode->matrix, node.matrix.data(), sizeof(simd::float4x4));
     }
     
     // 带Children的Node
@@ -510,17 +463,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                     }
                 }
                 Primitive *newPrimitive = new Primitive(indexStart, indexCount, vertexCount, primitive.material > -1 ? materials[primitive.material] : materials.back());
-                newPrimitive->setBoundingBox(posMin, posMax);
                 newMesh->primitives.push_back(newPrimitive);
-            }
-            
-            for (Primitive *p : newMesh->primitives) {
-                if (p->bb.valid && !newMesh->bb.valid) {
-                    newMesh->bb = p->bb;
-                    newMesh->bb.valid = true;
-                }
-                newMesh->bb.min = simd::min(newMesh->bb.min, p->bb.min);
-                newMesh->bb.max = simd::min(newMesh->bb.min, p->bb.max);
             }
             newNode->mesh = newMesh;
         }
@@ -596,100 +539,15 @@ void Model::loadMaterials(tinygltf::Model &model) {
         material.doubleSided = mat.doubleSided;
         if (mat.values.find("baseColorTexture") != mat.values.end()) {
             material.baseColorTexture = &textures[mat.values["baseColorTexture"].TextureIndex()];
-            material.texCoordSets.baseColor = mat.values["baseColorTexture"].TextureTexCoord();
-        }
-        if (mat.values.find("metallicRoughnessTexture") != mat.values.end()) {
-            material.metallicRoughnessTexture = &textures[mat.values["metallicRoughnessTexture"].TextureIndex()];
-            material.texCoordSets.metallicRoughness = mat.values["metallicRoughnessTexture"].TextureTexCoord();
-        }
-        if (mat.values.find("roughnessFactor") != mat.values.end()) {
-            material.roughnessFactor = static_cast<float>(mat.values["roughnessFactor"].Factor());
-        }
-        if (mat.values.find("metallicFactor") != mat.values.end()) {
-            material.metallicFactor = static_cast<float>(mat.values["metallicFactor"].Factor());
         }
         if (mat.values.find("baseColorFactor") != mat.values.end()) {
             auto factor = mat.values["baseColorFactor"].ColorFactor();
             material.baseColorFactor = simd::make_float4(static_cast<float>(factor[0]), static_cast<float>(factor[1]), static_cast<float>(factor[2]), static_cast<float>(factor[3]));
         }
-        if (mat.additionalValues.find("normalTexture") != mat.additionalValues.end()) {
-            material.normalTexture = &textures[mat.additionalValues["normalTexture"].TextureIndex()];
-            material.texCoordSets.normal = mat.additionalValues["normalTexture"].TextureTexCoord();
-        }
-        if (mat.additionalValues.find("emissiveTexture") != mat.additionalValues.end()) {
-            material.emissiveTexture = &textures[mat.additionalValues["emissiveTexture"].TextureIndex()];
-            material.texCoordSets.emissive = mat.additionalValues["emissiveTexture"].TextureTexCoord();
-        }
-        if (mat.additionalValues.find("occlusionTexture") != mat.additionalValues.end()) {
-            material.occlusionTexture = &textures[mat.additionalValues["occlusionTexture"].TextureIndex()];
-            material.texCoordSets.occlusion = mat.additionalValues["occlusionTexture"].TextureTexCoord();
-        }
-        if (mat.additionalValues.find("alphaMode") != mat.additionalValues.end()) {
-            tinygltf::Parameter param = mat.additionalValues["alphaMode"];
-            if (param.string_value == "BLEND") {
-                material.alphaMode = Material::ALPHAMODE_BLEND;
-            }
-            if (param.string_value == "MASK") {
-                material.alphaCutoff = 0.5f;
-                material.alphaMode = Material::ALPHAMODE_MASK;
-            }
-        }
-        if (mat.additionalValues.find("alphaCutoff") != mat.additionalValues.end()) {
-            material.alphaCutoff = static_cast<float>(mat.additionalValues["alphaCutoff"].Factor());
-        }
-        if (mat.additionalValues.find("emissiveFactor") != mat.additionalValues.end()) {
-            auto factor = mat.additionalValues["emissiveFactor"].ColorFactor();
-            material.emissiveFactor = simd::make_float4(static_cast<float>(factor[0]), static_cast<float>(factor[1]), static_cast<float>(factor[2]), 1.0f);
-        }
-        
         material.index = static_cast<uint32_t>(materials.size());
         materials.push_back(material);
     }
     materials.push_back(Material( ));
-}
-
-void Model::calculateBoundBox(Node *node, Node *parent) {
-    BoundingBox pareentBVH = parent ? parent->bvh : BoundingBox(dimensions.min, dimensions.max);
-    
-    if (node->mesh) {
-        if (node->mesh->bb.valid) {
-            node->aabb = node->mesh->bb.getAABB(node->getMatrix());
-            if (node->children.size() == 0) {
-                node->bvh.min = node->aabb.min;
-                node->bvh.max = node->aabb.max;
-                node->bvh.valid = true;
-            }
-        }
-    }
-    
-    pareentBVH.min = simd::min(pareentBVH.min, node->bvh.min);
-    pareentBVH.max = simd::min(pareentBVH.max, node->bvh.max);
-    
-    for (auto &child : node->children) {
-        calculateBoundBox(child, node);
-    }
-}
-
-void Model::getSceneDimensions() {
-    for (Node *node : linearNodes) {
-        calculateBoundBox(node, nullptr);
-    }
-    
-    dimensions.min = simd::make_float3(FLT_MAX, FLT_MAX, FLT_MAX);
-    dimensions.max = simd::make_float3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-    
-    for (Node *node : linearNodes) {
-        if (node->bvh.valid) {
-            dimensions.min = simd::min(dimensions.min, node->bvh.min);
-            dimensions.max = simd::max(dimensions.max, node->bvh.max);
-        }
-    }
-    
-    simd::float3 extent = dimensions.max - dimensions.min;
-    aabb = simd::float4x4(simd::make_float4(extent.x, 0.0f, 0.0f, 0.0f),
-                          simd::make_float4(0.0f, extent.y, 0.0f, 0.0f),
-                          simd::make_float4(0.0f, 0.0f, extent.z, 0.0f),
-                          simd::make_float4(dimensions.min.x, dimensions.min.y, dimensions.min.z, 1.0f));
 }
 
 Node* Model::fineNode(Node *parent, uint32_t index) {
@@ -776,9 +634,6 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         for (Primitive *primitive : node->mesh->primitives) {
             if (primitive->material.baseColorTexture != NULL) {
                 pEncoder->setFragmentTexture(primitive->material.baseColorTexture->image, 1);
-            }
-            if (primitive->material.normalTexture != NULL) {
-                pEncoder->setFragmentTexture(primitive->material.normalTexture->image, 2);
             }
             
             pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);

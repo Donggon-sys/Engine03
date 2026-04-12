@@ -16,15 +16,6 @@ namespace Skybox {
 
 struct Node;
 
-struct BoundingBox {
-    simd::float3 min;
-    simd::float3 max;
-    bool valid = false;
-    BoundingBox();
-    BoundingBox(simd::float3 min, simd::float3 max);
-    BoundingBox getAABB(simd::float4x4 m);
-};
-
 struct TextureSampler {
     MTL::SamplerMinMagFilter magFilter;
     MTL::SamplerMinMagFilter minFilter;
@@ -42,37 +33,9 @@ struct Texture {
 };
 
 struct Material {
-    enum AlphaMode { ALPHAMODE_OPAQUE, ALPHAMODE_MASK, ALPHAMODE_BLEND };
-    AlphaMode alphaMode = ALPHAMODE_OPAQUE;
-    float alphaCutoff = 1.0f;
-    float metallicFactor = 1.0f;
-    float roughnessFactor = 1.0f;
     simd::float4 baseColorFactor = simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f);
-    simd::float4 emissiveFactor = simd::make_float4(0.0f, 0.0f, 0.0f, 0.0f);
     Texture *baseColorTexture = nullptr;
-    Texture *metallicRoughnessTexture = nullptr;
-    Texture *normalTexture = nullptr;
-    Texture *occlusionTexture = nullptr;
-    Texture *emissiveTexture = nullptr;
     bool doubleSided = false;
-    struct TexCoordSets {
-        uint8_t baseColor = 0;
-        uint8_t metallicRoughness = 0;
-        uint8_t specularGlossiness = 0;
-        uint8_t normal = 0;
-        uint8_t occlusion = 0;
-        uint8_t emissive = 0;
-    } texCoordSets;
-    struct Extension {
-        Texture *specularGlossinessTexture = nullptr;
-        Texture *diffuseTexture = nullptr;
-        simd::float4 diffuseFactor = simd::make_float4(1.0f, 1.0f, 1.0f, 1.0f);
-        simd::float3 specularFactor = simd::make_float3(0.0f, 0.0f, 0.0f);
-    } extension;
-    struct PBRWorkflows {
-        bool metallicRoughness = true;
-        bool specularGlossiness = false;
-    } pbrWorkflows;
     int index = 0;
     bool unlit = false;
     float emissiveStrength = 1.0f;
@@ -84,20 +47,16 @@ struct Primitive {
     uint32_t vertexCount;
     Material &material;
     bool hasIndices;
-    BoundingBox bb;
     Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material &material);
-    void setBoundingBox(simd::float3 min, simd::float3 max);
 };
 
 struct Mesh {
     std::vector<Primitive *> primitives;
-    BoundingBox bb, aabb;
     simd::float4x4 matrix;
     uint32_t jointCount { 0 };
     uint32_t index;
     Mesh(simd::float4x4 matrix);
     ~Mesh();
-    void setBoundingBox(simd::float3 min, simd::float3 max);
 };
 
 struct Node {
@@ -110,7 +69,6 @@ struct Node {
     simd::float3 translation = simd::make_float3(0.0f, 0.0f, 0.0f);
     simd::float3 scale = simd::make_float3(1.0f, 1.0f, 1.0f);
     simd::quatf rotation = simd::quatf(0.0f, 0.0f, 0.0f, 1.0f);
-    BoundingBox bvh, aabb;
     bool useCacheMatrix { false };
     simd::float4x4 cachedLocalMatrix{ simd::float4x4(1.0f) };
     simd::float4x4 cachedMatrix{ simd::float4x4(1.0f) };
@@ -151,13 +109,10 @@ struct Model {
     } dimensions;
     
     void loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeIndex, const tinygltf::Model &model, LoaderInfo &loaderInfo, float globalscale);
-    void loadSkin(tinygltf::Model &model);
     void drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder);
     void loadTexture(tinygltf::Model &model, MTL::Device *device, MTL::CommandQueue *queue);
     void loadTextureSamplers(tinygltf::Model &model);
     void loadMaterials(tinygltf::Model &model);
-    void calculateBoundBox(Node *node, Node *parent);
-    void getSceneDimensions();
     void clearup();
     Node* fineNode(Node *parent, uint32_t index);
     Node* nodeFromIndex(uint32_t index);
