@@ -1202,9 +1202,11 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         for (Primitive *primitive : node->mesh->primitives) {
             if (primitive->material.baseColorTexture != NULL) {
                 pEncoder->setFragmentTexture(primitive->material.baseColorTexture->image, 0);
+                pEncoder->setFragmentSamplerState(primitive->material.baseColorTexture->sampler, 0);
             }
             if (primitive->material.normalTexture != NULL) {
                 pEncoder->setFragmentTexture(primitive->material.normalTexture->image, 1);
+                pEncoder->setFragmentSamplerState(primitive->material.normalTexture->sampler, 1);
             }
             
             pEncoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, primitive->indexCount, MTL::IndexType::IndexTypeUInt32, pIndicesBuffer, primitive->firstIndex * sizeof(uint32_t), 1);

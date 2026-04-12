@@ -66,8 +66,10 @@ struct Material {
 
 [[fragment]] float4 fragmentShader1(vertexOut in [[stage_in]],
                                    texture2d<float> baseColorTexture[[texture(0)]],
-                                    texture2d<float> normalTexture[[texture(1)]]) {
-    constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
-    float4 out = baseColorTexture.sample(textureSampler, in.uv0);
+                                    sampler baseColorSampler [[sampler(0)]],
+                                    texture2d<float> normalTexture[[texture(1)]],
+                                    sampler normalSampler [[sampler(1)]]) {
+//    constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
+    float4 out = baseColorTexture.sample(baseColorSampler, in.uv0);
     return out;
 }
