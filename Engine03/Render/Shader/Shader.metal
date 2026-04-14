@@ -81,7 +81,7 @@ struct Material {
     float3 lightDir = normalize(float3(0.0f, 6.0f, 0.0f));
     
     float3 normal = float3(normalTexture.sample(normalSampler, in.uv1).xyz * 2.0f - 1.0f);
-    normal = in.normal;
+    normal = normalize(in.normal);
     float NdotL = max(dot(normal, lightDir), 0.0f);
     float3 diffuse = objectColor.xyz * lightColor * NdotL;
     
