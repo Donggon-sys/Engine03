@@ -177,6 +177,7 @@ struct LoaderInfo {
 struct Model {
     std::vector<simd::float3> position;
     std::vector<simd::float3> normal;
+    std::vector<simd::float4> tangent;
     std::vector<simd::float2> uv0;
     std::vector<simd::float2> uv1;
     std::vector<simd::uint4> joint0;
@@ -186,6 +187,7 @@ struct Model {
     
     MTL::Buffer *pPositionBuffer = nullptr;
     MTL::Buffer *pNormalBuffer = nullptr;
+    MTL::Buffer *pTangentBuffer = nullptr;
     MTL::Buffer *pTexCoord0Buffer = nullptr;
     MTL::Buffer *pTexCoord1Buffer = nullptr;
     MTL::Buffer *pJointsBuffer = nullptr;

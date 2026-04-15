@@ -16,6 +16,7 @@ struct vertexIn {
     uint4 joint0 [[attribute(4)]];
     float4 weight0 [[attribute(5)]];
     float4 color [[attribute(6)]];
+    float4 tangent [[attribute(7)]];
 };
 
 struct vertexOut {
@@ -80,7 +81,8 @@ struct Material {
 //    float3 lightPos = float3(0.0f, 6.0f, 0.0f);
     float3 lightDir = normalize(float3(0.0f, 6.0f, 0.0f));
     
-    float3 normal = float3(normalTexture.sample(normalSampler, in.uv1).xyz * 2.0f - 1.0f);
+    
+    float3 normal = normalize(normalTexture.sample(normalSampler, in.uv1).xyz * 2.0f - 1.0f);
     normal = normalize(in.normal);
     float NdotL = max(dot(normal, lightDir), 0.0f);
     float3 diffuse = objectColor.xyz * lightColor * NdotL;

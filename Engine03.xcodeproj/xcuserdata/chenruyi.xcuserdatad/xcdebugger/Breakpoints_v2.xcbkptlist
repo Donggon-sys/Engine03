@@ -30,8 +30,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1109"
-            endingLineNumber = "1109"
+            startingLineNumber = "1116"
+            endingLineNumber = "1116"
             landmarkName = "Model::updateAnimation(index, time)"
             landmarkType = "7">
          </BreakpointContent>
@@ -46,8 +46,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1108"
-            endingLineNumber = "1108"
+            startingLineNumber = "1115"
+            endingLineNumber = "1115"
             landmarkName = "Model::updateAnimation(index, time)"
             landmarkType = "7">
          </BreakpointContent>
@@ -142,8 +142,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "621"
-            endingLineNumber = "621"
+            startingLineNumber = "628"
+            endingLineNumber = "628"
             landmarkName = "Model::loadNode(parent, node, nodeIndex, model, loaderInfo, globalscale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -158,8 +158,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1061"
-            endingLineNumber = "1061"
+            startingLineNumber = "1068"
+            endingLineNumber = "1068"
             landmarkName = "Model::updateAnimation(index, time)"
             landmarkType = "7">
          </BreakpointContent>
@@ -174,8 +174,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1218"
-            endingLineNumber = "1218"
+            startingLineNumber = "1227"
+            endingLineNumber = "1227"
             landmarkName = "unknown"
             landmarkType = "0">
          </BreakpointContent>
@@ -190,8 +190,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "586"
-            endingLineNumber = "586"
+            startingLineNumber = "593"
+            endingLineNumber = "593"
             landmarkName = "Model::loadNode(parent, node, nodeIndex, model, loaderInfo, globalscale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -206,8 +206,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1155"
-            endingLineNumber = "1155"
+            startingLineNumber = "1162"
+            endingLineNumber = "1162"
             landmarkName = "Model::loadModel(device, fileName, queue, scale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -302,8 +302,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "959"
-            endingLineNumber = "959"
+            startingLineNumber = "966"
+            endingLineNumber = "966"
             landmarkName = "Model::loadAnimation(model)"
             landmarkType = "7">
          </BreakpointContent>
@@ -318,8 +318,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1230"
-            endingLineNumber = "1230"
+            startingLineNumber = "1240"
+            endingLineNumber = "1240"
             landmarkName = "Model::draw(pEncoder, pipelineState, depthStencilState)"
             landmarkType = "7">
          </BreakpointContent>
@@ -334,8 +334,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "575"
-            endingLineNumber = "575"
+            startingLineNumber = "582"
+            endingLineNumber = "582"
             landmarkName = "Model::loadNode(parent, node, nodeIndex, model, loaderInfo, globalscale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -350,8 +350,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "620"
-            endingLineNumber = "620"
+            startingLineNumber = "627"
+            endingLineNumber = "627"
             landmarkName = "Model::loadNode(parent, node, nodeIndex, model, loaderInfo, globalscale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -366,8 +366,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "927"
-            endingLineNumber = "927"
+            startingLineNumber = "934"
+            endingLineNumber = "934"
             landmarkName = "Model::loadAnimation(model)"
             landmarkType = "7">
          </BreakpointContent>
@@ -414,8 +414,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1158"
-            endingLineNumber = "1158"
+            startingLineNumber = "1165"
+            endingLineNumber = "1165"
             landmarkName = "Model::loadModel(device, fileName, queue, scale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -430,8 +430,8 @@
             filePath = "Engine03/Render/Model/Model.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "424"
-            endingLineNumber = "424"
+            startingLineNumber = "430"
+            endingLineNumber = "430"
             landmarkName = "Model::operator=(other)"
             landmarkType = "7">
          </BreakpointContent>
@@ -448,6 +448,22 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "588"
             endingLineNumber = "588"
+            landmarkName = "Model::loadModel(device, fileName, queue, scale)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A8885395-9248-4D1F-A1A6-5DA95EC74877"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Engine03/Render/Model/Model.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1173"
+            endingLineNumber = "1173"
             landmarkName = "Model::loadModel(device, fileName, queue, scale)"
             landmarkType = "7">
          </BreakpointContent>

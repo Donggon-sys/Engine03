@@ -147,6 +147,11 @@ void Scene::createPipelineState(MTL::Device *device, MTL::Library *library) {
             vertexDescriptor->attributes()->object(NS::UInteger(6))->setBufferIndex(NS::UInteger(6));
             vertexDescriptor->layouts()->object(NS::UInteger(6))->setStride(NS::UInteger(sizeof(simd::float4)));
             
+            vertexDescriptor->attributes()->object(NS::UInteger(7))->setFormat(MTL::VertexFormat::VertexFormatFloat4);
+            vertexDescriptor->attributes()->object(NS::UInteger(7))->setOffset(NS::UInteger(0));
+            vertexDescriptor->attributes()->object(NS::UInteger(7))->setBufferIndex(NS::UInteger(7));
+            vertexDescriptor->layouts()->object(NS::UInteger(7))->setStride(NS::UInteger(sizeof(simd::float4)));
+            
             descriptor->setVertexDescriptor(vertexDescriptor);
             vertexDescriptor->release();
         }

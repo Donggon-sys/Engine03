@@ -13,6 +13,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <tinygltf/tiny_gltf.h>
 
+#include "Tangent.hpp"
+
 namespace BTflag {
 namespace Model {
 
@@ -344,6 +346,7 @@ Model::~Model() {
     pIndicesBuffer->release();
     pPositionBuffer->release();
     pNormalBuffer->release();
+    pTangentBuffer->release();
     pTexCoord0Buffer->release();
     pTexCoord1Buffer->release();
     pColorBuffer->release();
@@ -385,6 +388,7 @@ Model::Model(Model &&other) {
     pIndicesBuffer = other.pIndicesBuffer;
     pPositionBuffer = other.pPositionBuffer;
     pNormalBuffer = other.pNormalBuffer;
+    pTangentBuffer = other.pTangentBuffer;
     pTexCoord0Buffer = other.pTexCoord0Buffer;
     pTexCoord1Buffer = other.pTexCoord1Buffer;
     pColorBuffer = other.pColorBuffer;
@@ -397,6 +401,7 @@ Model::Model(Model &&other) {
     other.pIndicesBuffer = nullptr;
     other.pPositionBuffer = nullptr;
     other.pNormalBuffer = nullptr;
+    other.pTangentBuffer = nullptr;
     other.pTexCoord0Buffer = nullptr;
     other.pTexCoord1Buffer = nullptr;
     other.pColorBuffer = nullptr;
@@ -421,6 +426,7 @@ Model& Model::operator=(Model &&other) {
         pIndicesBuffer = other.pIndicesBuffer;
         pPositionBuffer = other.pPositionBuffer;
         pNormalBuffer = other.pNormalBuffer;
+        pTangentBuffer = other.pTangentBuffer;
         pTexCoord0Buffer = other.pTexCoord0Buffer;
         pTexCoord1Buffer = other.pTexCoord1Buffer;
         pColorBuffer = other.pColorBuffer;
@@ -433,6 +439,7 @@ Model& Model::operator=(Model &&other) {
         other.pIndicesBuffer = nullptr;
         other.pPositionBuffer = nullptr;
         other.pNormalBuffer = nullptr;
+        other.pTangentBuffer = nullptr;
         other.pTexCoord0Buffer = nullptr;
         other.pTexCoord1Buffer = nullptr;
         other.pColorBuffer = nullptr;
@@ -1163,6 +1170,8 @@ void Model::loadModel(MTL::Device *device, std::string fileName, MTL::CommandQue
     pIndicesBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::ResourceStorageModeShared);
     
     pJointMatrices = pDevice->newBuffer(sizeof(simd::float4x4) * MAX_NUM_JOINTS, MTL::ResourceStorageModeShared);
+    TangentGen(this);
+    pTangentBuffer = pDevice->newBuffer(tangent.data(), tangent.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
     
     clearup();
 }
@@ -1224,6 +1233,7 @@ void Model::draw(MTL::RenderCommandEncoder *pEncoder, MTL::RenderPipelineState* 
     pEncoder->setVertexBuffer(pJointsBuffer, NS::UInteger(0), NS::UInteger(4));
     pEncoder->setVertexBuffer(pWeightsBuffer, NS::UInteger(0), NS::UInteger(5));
     pEncoder->setVertexBuffer(pColorBuffer, NS::UInteger(0), NS::UInteger(6));
+    pEncoder->setVertexBuffer(pTangentBuffer, NS::UInteger(0), NS::UInteger(7));
     for (auto &node : nodes) {
         // TODO: 绘制每个mesh
         pEncoder->setRenderPipelineState(pipelineState);
