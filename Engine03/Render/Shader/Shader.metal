@@ -24,7 +24,7 @@ struct vertexOut {
     float2 uv0;
     float2 uv1;
     float4 color;
-    float3 normal;
+    float3 B, T, N;
 };
 
 [[vertex]] vertexOut vertexShader1(vertexIn in [[stage_in]],
@@ -34,7 +34,8 @@ struct vertexOut {
                                    
                                    constant bool& hasSkin [[buffer(13)]]) {
     float4 position = transfromMatrix * float4(in.pos, 1.0f);
-    float3 normal = in.normal;
+    float3 N = in.normal;
+    float3 T = in.tangent.xyz;
     
     if (hasSkin != 0 && jointMatrices != nullptr) {
         float4x4 skinMatrix =  in.weight0.x * jointMatrices[in.joint0.x]
@@ -42,14 +43,23 @@ struct vertexOut {
                              + in.weight0.z * jointMatrices[in.joint0.z]
                              + in.weight0.w * jointMatrices[in.joint0.w];
         position = skinMatrix * position;
-        normal = normalize((skinMatrix * float4(normal, 0.0f)).xyz);
+        
+        // 创建normal matrix
+        float3x3 normalMatrix = float3x3(skinMatrix[0].xyz, skinMatrix[1].xyz, skinMatrix[2].xyz);
+        
+        N = normalize(normalMatrix * N);
+        T = normalize(normalMatrix * T);
+        T = normalize(T - N * dot(N, T));
     }
+    float3 B = cross(N, T) * in.tangent.w;
     
     vertexOut out;
     out.vertexPosition = viewProjectionMatrix * position;
     out.uv0 = in.uv0;
     out.uv1 = in.uv1;
-    out.normal = normal;
+    out.N = N;
+    out.T = T;
+    out.B = B;
     return out;
 }
 
@@ -82,8 +92,11 @@ struct Material {
     float3 lightDir = normalize(float3(0.0f, 6.0f, 0.0f));
     
     
+    float3x3 BTN = float3x3(in.T, in.B, in.N);
+    
+    
     float3 normal = normalize(normalTexture.sample(normalSampler, in.uv1).xyz * 2.0f - 1.0f);
-    normal = normalize(in.normal);
+    normal = BTN * normal;
     float NdotL = max(dot(normal, lightDir), 0.0f);
     float3 diffuse = objectColor.xyz * lightColor * NdotL;
     
