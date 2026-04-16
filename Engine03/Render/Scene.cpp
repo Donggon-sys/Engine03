@@ -38,6 +38,10 @@ void Scene::createScene(MTL::Device *device, MTL::Library *library) {
     BTflag::Model::Model mod2 = BTflag::Model::Model();
     mod2.loadModel(device, "fish.glb", device->newCommandQueue(), 1.0f);
     modelList1.push_back(std::move(mod2));
+//    
+//    BTflag::Model::Model mod3 = BTflag::Model::Model();
+//    mod3.loadModel(device, "crash_bandicoot.glb", device->newCommandQueue(), 1.0f);
+//    modelList1.push_back(std::move(mod3));
 }
 
 void Scene::renderScene(MTL::RenderCommandEncoder *encoder) {

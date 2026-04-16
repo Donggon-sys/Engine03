@@ -545,7 +545,8 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 
                 // TODO: 角度
                 if (primitive.attributes.find("TANGENT") != primitive.attributes.end()) {
-                    const tinygltf::Accessor &tangentAccessor = model.accessors[primitive.attributes.find("NORMAL")->second];
+//                    std::cout << "有tangent" << std::endl;
+                    const tinygltf::Accessor &tangentAccessor = model.accessors[primitive.attributes.find("TANGENT")->second];
                     const tinygltf::BufferView &tangentView = model.bufferViews[tangentAccessor.bufferView];
                     bufferTangents = reinterpret_cast<const float *>(&(model.buffers[tangentView.buffer].data[tangentAccessor.byteOffset + tangentView.byteOffset]));
                     tangentBufferStride = tangentAccessor.ByteStride(tangentView) ? (tangentAccessor.ByteStride(tangentView) / sizeof(float)) : tinygltf::GetNumComponentsInType(TINYGLTF_TYPE_VEC4);
@@ -602,6 +603,10 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                         this->normal.push_back(simd::make_float3(pNormal[0], pNormal[1], pNormal[2]));
                     } else {
                         this->normal.push_back(simd::make_float3(0.0f, 0.0f, 0.0f));
+                    }
+                    if (bufferTangents) {
+                        const float *pTangent = &bufferTangents[v * tangentBufferStride];
+                        this->tangent.push_back(simd::make_float4(pTangent[0], pTangent[1], pTangent[2], -pTangent[3]));
                     }
                     
                     if (bufferTexCoordSet0) {
@@ -1170,7 +1175,7 @@ void Model::loadModel(MTL::Device *device, std::string fileName, MTL::CommandQue
     pIndicesBuffer = pDevice->newBuffer(vertexIndices.data(), vertexIndices.size() * sizeof(unsigned int), MTL::ResourceStorageModeShared);
     
     pJointMatrices = pDevice->newBuffer(sizeof(simd::float4x4) * MAX_NUM_JOINTS, MTL::ResourceStorageModeShared);
-    TangentGen(this);
+//    TangentGen(this);
     pTangentBuffer = pDevice->newBuffer(tangent.data(), tangent.size() * sizeof(simd::float4), MTL::ResourceStorageModeShared);
     
     clearup();
@@ -1200,7 +1205,8 @@ void Model::drawNode(Node *node, MTL::RenderCommandEncoder *pEncoder) {
         // TODO: 动画数据进入
         bool hasSkin = node->skin? true : false;
         pEncoder->setVertexBytes(&hasSkin, sizeof(bool), NS::UInteger(13));
-        simd::float4x4 transformMatrix = node->getMatrix();
+//        simd::float4x4 transformMatrix = node->getMatrix();
+        simd::float4x4 transformMatrix = simd::float4x4(1.0f);
 
         pEncoder->setVertexBytes(&transformMatrix, sizeof(simd::float4x4), NS::UInteger(10));
         if (hasSkin) {
