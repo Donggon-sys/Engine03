@@ -595,7 +595,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                 for (size_t v = 0; v < posAccessor.count; v++) {
                     {
                         const float *pos = &bufferPos[v * posBufferStride];
-                        this->position.push_back(simd::make_float3(pos[0] * globalscale, pos[1] * globalscale, pos[2] * globalscale));
+                        this->position.push_back(simd::make_float3(pos[0], pos[1], pos[2]));
                     }
                     
                     if (bufferNormals) {
@@ -606,7 +606,7 @@ void Model::loadNode(Node *parent, const tinygltf::Node &node, uint32_t nodeInde
                     }
                     if (bufferTangents) {
                         const float *pTangent = &bufferTangents[v * tangentBufferStride];
-                        this->tangent.push_back(simd::make_float4(pTangent[0], pTangent[1], pTangent[2], -pTangent[3]));
+                        this->tangent.push_back(simd::make_float4(pTangent[0], pTangent[1], pTangent[2], pTangent[3]));
                     }
                     
                     if (bufferTexCoordSet0) {
